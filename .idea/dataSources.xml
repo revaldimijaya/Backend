@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="TPA_Web@localhost" uuid="5112ecab-85f7-4b72-a86b-e05fbe2f5105">
+    <data-source source="LOCAL" name="d2778uadjv4tq2@ec2-52-202-146-43.compute-1.amazonaws.com" uuid="bed1cd79-2d27-4bf3-aeef-3d34fb8925f6">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/TPA_Web</jdbc-url>
+      <jdbc-url>jdbc:postgresql://ec2-52-202-146-43.compute-1.amazonaws.com:5432/d2778uadjv4tq2</jdbc-url>
+      <driver-properties>
+        <property name="sslmode" value="require" />
+        <property name="sslfactory" value="org.postgresql.ssl.NonValidatingFactory" />
+        <property name="ssl" value="true" />
+      </driver-properties>
     </data-source>
   </component>
 </project>

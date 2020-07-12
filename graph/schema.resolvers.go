@@ -8,6 +8,7 @@ import (
 	"Go_Backend/graph/model"
 	"context"
 	"errors"
+	"fmt"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error) {
@@ -129,6 +130,7 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	err := r.DB.Model(&user).Order("id").Select()
 
 	if err != nil {
+		fmt.Println(err)
 		return nil, errors.New("Failed to query users")
 	}
 
