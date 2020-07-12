@@ -1,0 +1,41 @@
+type User {
+  id: String!
+  name: String!
+  membership: Boolean!
+}
+
+type Video {
+  id: ID!
+  user_id: String!
+  url: String!
+  watch: Int!
+  like: Int!
+}
+
+type Query{
+  users: [User!]!
+  videos: [Video!]!
+}
+
+input newUser {
+  id: String!
+  name: String!
+  membership: Boolean!
+}
+
+input newVideo {
+  user_id: String!
+  url: String!
+  watch: Int!
+  like: Int!
+}
+
+type Mutation {
+  createUser (input: newUser): User!
+  updateUser (id: String!, input: newUser): User!
+  deleteUser (id: String!): Boolean!
+  createVideo (input: newVideo): Video!
+  updateVideo (id: ID!, input: newVideo): Video!
+  deleteVideo (id: ID!): Boolean!
+}
+
