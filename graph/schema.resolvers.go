@@ -149,6 +149,22 @@ func (r *queryResolver) Videos(ctx context.Context) ([]*model.Video, error) {
 	return video, nil
 }
 
+func (r *queryResolver) GetUserID(ctx context.Context, userid string) (*model.User, error) {
+	var user model.User
+
+	err := r.DB.Model(&user).Where("id = ?", userid).First()
+
+	if err != nil {
+		return nil, errors.New("user not found!")
+	}
+
+	return &user,nil
+}
+
+func (r *queryResolver) GetVideoByUser(ctx context.Context, userid string) ([]*model.Video, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
