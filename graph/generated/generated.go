@@ -337,7 +337,7 @@ var sources = []*ast.Source{
 	&ast.Source{Name: "graph/schema.graphqls", Input: `type User {
   id: String!
   name: String!
-  membership: Boolean!
+  membership: String!
 }
 
 type Video {
@@ -358,7 +358,7 @@ type Query{
 input newUser {
   id: String!
   name: String!
-  membership: Boolean!
+  membership: String!
 }
 
 input newVideo {
@@ -1125,9 +1125,9 @@ func (ec *executionContext) _User_membership(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Video_id(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
@@ -2375,7 +2375,7 @@ func (ec *executionContext) unmarshalInputnewUser(ctx context.Context, obj inter
 			}
 		case "membership":
 			var err error
-			it.Membership, err = ec.unmarshalNBoolean2bool(ctx, v)
+			it.Membership, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

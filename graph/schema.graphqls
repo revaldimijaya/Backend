@@ -1,7 +1,7 @@
 type User {
   id: String!
   name: String!
-  membership: Boolean!
+  membership: String!
 }
 
 type Video {
@@ -22,7 +22,7 @@ type Query{
 input newUser {
   id: String!
   name: String!
-  membership: Boolean!
+  membership: String!
 }
 
 input newVideo {

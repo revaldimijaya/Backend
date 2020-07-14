@@ -5,7 +5,7 @@ package model
 type User struct {
 	ID         string `json:"id"`
 	Name       string `json:"name"`
-	Membership bool   `json:"membership"`
+	Membership string `json:"membership"`
 }
 
 type Video struct {
@@ -19,7 +19,7 @@ type Video struct {
 type NewUser struct {
 	ID         string `json:"id"`
 	Name       string `json:"name"`
-	Membership bool   `json:"membership"`
+	Membership string `json:"membership"`
 }
 
 type NewVideo struct {

@@ -158,7 +158,7 @@ func (r *queryResolver) GetUserID(ctx context.Context, userid string) (*model.Us
 		return nil, errors.New("user not found!")
 	}
 
-	return &user,nil
+	return &user, nil
 }
 
 func (r *queryResolver) GetVideoByUser(ctx context.Context, userid string) ([]*model.Video, error) {
