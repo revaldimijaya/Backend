@@ -35,14 +35,27 @@ type Query{
 input newUser {
   id: String!
   name: String!
+  photo: String!
   membership: String!
 }
 
 input newVideo {
+  id: ID!
   user_id: String!
   url: String!
   watch: Int!
   like: Int!
+  dislike: Int!
+  restriction: String!
+  location: String!
+}
+
+input newComment {
+  user_id: String!
+  video_id: Int!
+  comment: String!
+  like: Int!
+  dislike: Int!
 }
 
 type Mutation {
@@ -52,5 +65,6 @@ type Mutation {
   createVideo (input: newVideo): Video!
   updateVideo (id: ID!, input: newVideo): Video!
   deleteVideo (id: ID!): Boolean!
+  createComment (input: newComment):
 }
 
