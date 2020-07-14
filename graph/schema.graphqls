@@ -1,6 +1,7 @@
 type User {
   id: String!
   name: String!
+  photo: String!
   membership: String!
 }
 
@@ -10,6 +11,18 @@ type Video {
   url: String!
   watch: Int!
   like: Int!
+  dislike: Int!
+  restriction: String!
+  location: String!
+}
+
+type Comment{
+  id: ID!
+  user_id: String!
+  video_id: Int!
+  comment: String!
+  like: Int!
+  dislike: Int!
 }
 
 type Query{
