@@ -27,6 +27,7 @@ type Video struct {
 	Dislike     int    `json:"dislike"`
 	Restriction string `json:"restriction"`
 	Location    string `json:"location"`
+	Name        string `json:"name"`
 }
 
 type NewComment struct {
@@ -52,4 +53,5 @@ type NewVideo struct {
 	Dislike     int    `json:"dislike"`
 	Restriction string `json:"restriction"`
 	Location    string `json:"location"`
+	Name        string `json:"name"`
 }

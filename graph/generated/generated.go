@@ -83,6 +83,7 @@ type ComplexityRoot struct {
 		ID          func(childComplexity int) int
 		Like        func(childComplexity int) int
 		Location    func(childComplexity int) int
+		Name        func(childComplexity int) int
 		Restriction func(childComplexity int) int
 		URL         func(childComplexity int) int
 		UserID      func(childComplexity int) int
@@ -367,6 +368,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Video.Location(childComplexity), true
 
+	case "Video.name":
+		if e.complexity.Video.Name == nil {
+			break
+		}
+
+		return e.complexity.Video.Name(childComplexity), true
+
 	case "Video.restriction":
 		if e.complexity.Video.Restriction == nil {
 			break
@@ -475,9 +483,10 @@ type Video {
   dislike: Int!
   restriction: String!
   location: String!
+  name: String!
 }
 
-type Comment{
+type Comment {
   id: ID!
   user_id: String!
   video_id: Int!
@@ -509,6 +518,7 @@ input newVideo {
   dislike: Int!
   restriction: String!
   location: String!
+  name: String!
 }
 
 input newComment {
@@ -1958,6 +1968,40 @@ func (ec *executionContext) _Video_location(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Video_name(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3139,6 +3183,12 @@ func (ec *executionContext) unmarshalInputnewVideo(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -3461,6 +3511,11 @@ func (ec *executionContext) _Video(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "location":
 			out.Values[i] = ec._Video_location(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Video_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

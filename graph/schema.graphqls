@@ -14,9 +14,10 @@ type Video {
   dislike: Int!
   restriction: String!
   location: String!
+  name: String!
 }
 
-type Comment{
+type Comment {
   id: ID!
   user_id: String!
   video_id: Int!
@@ -48,6 +49,7 @@ input newVideo {
   dislike: Int!
   restriction: String!
   location: String!
+  name: String!
 }
 
 input newComment {
