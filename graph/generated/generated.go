@@ -53,12 +53,14 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateUser  func(childComplexity int, input *model.NewUser) int
-		CreateVideo func(childComplexity int, input *model.NewVideo) int
-		DeleteUser  func(childComplexity int, id string) int
-		DeleteVideo func(childComplexity int, id string) int
-		UpdateUser  func(childComplexity int, id string, input *model.NewUser) int
-		UpdateVideo func(childComplexity int, id string, input *model.NewVideo) int
+		CreateComment func(childComplexity int, input *model.NewComment) int
+		CreateUser    func(childComplexity int, input *model.NewUser) int
+		CreateVideo   func(childComplexity int, input *model.NewVideo) int
+		DeleteComment func(childComplexity int, userid string) int
+		DeleteUser    func(childComplexity int, id string) int
+		DeleteVideo   func(childComplexity int, id string) int
+		UpdateUser    func(childComplexity int, id string, input *model.NewUser) int
+		UpdateVideo   func(childComplexity int, id string, input *model.NewVideo) int
 	}
 
 	Query struct {
@@ -94,6 +96,8 @@ type MutationResolver interface {
 	CreateVideo(ctx context.Context, input *model.NewVideo) (*model.Video, error)
 	UpdateVideo(ctx context.Context, id string, input *model.NewVideo) (*model.Video, error)
 	DeleteVideo(ctx context.Context, id string) (bool, error)
+	CreateComment(ctx context.Context, input *model.NewComment) (*model.Comment, error)
+	DeleteComment(ctx context.Context, userid string) (bool, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
@@ -159,6 +163,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.VideoID(childComplexity), true
 
+	case "Mutation.createComment":
+		if e.complexity.Mutation.CreateComment == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createComment_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateComment(childComplexity, args["input"].(*model.NewComment)), true
+
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
 			break
@@ -182,6 +198,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateVideo(childComplexity, args["input"].(*model.NewVideo)), true
+
+	case "Mutation.deleteComment":
+		if e.complexity.Mutation.DeleteComment == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteComment_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteComment(childComplexity, args["userid"].(string)), true
 
 	case "Mutation.deleteUser":
 		if e.complexity.Mutation.DeleteUser == nil {
@@ -454,14 +482,27 @@ type Query{
 input newUser {
   id: String!
   name: String!
+  photo: String!
   membership: String!
 }
 
 input newVideo {
+  id: ID!
   user_id: String!
   url: String!
   watch: Int!
   like: Int!
+  dislike: Int!
+  restriction: String!
+  location: String!
+}
+
+input newComment {
+  user_id: String!
+  video_id: Int!
+  comment: String!
+  like: Int!
+  dislike: Int!
 }
 
 type Mutation {
@@ -471,6 +512,8 @@ type Mutation {
   createVideo (input: newVideo): Video!
   updateVideo (id: ID!, input: newVideo): Video!
   deleteVideo (id: ID!): Boolean!
+  createComment (input: newComment): Comment!
+  deleteComment (userid: String!): Boolean!
 }
 
 `, BuiltIn: false},
@@ -480,6 +523,20 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.NewComment
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOnewComment2ᚖGo_BackendᚋgraphᚋmodelᚐNewComment(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -506,6 +563,20 @@ func (ec *executionContext) field_Mutation_createVideo_args(ctx context.Context,
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userid"] = arg0
 	return args, nil
 }
 
@@ -1093,6 +1164,88 @@ func (ec *executionContext) _Mutation_deleteVideo(ctx context.Context, field gra
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().DeleteVideo(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createComment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createComment_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateComment(rctx, args["input"].(*model.NewComment))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Comment)
+	fc.Result = res
+	return ec.marshalNComment2ᚖGo_BackendᚋgraphᚋmodelᚐComment(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteComment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteComment_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteComment(rctx, args["userid"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2791,6 +2944,48 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputnewComment(ctx context.Context, obj interface{}) (model.NewComment, error) {
+	var it model.NewComment
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "user_id":
+			var err error
+			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "video_id":
+			var err error
+			it.VideoID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "comment":
+			var err error
+			it.Comment, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "like":
+			var err error
+			it.Like, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dislike":
+			var err error
+			it.Dislike, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputnewUser(ctx context.Context, obj interface{}) (model.NewUser, error) {
 	var it model.NewUser
 	var asMap = obj.(map[string]interface{})
@@ -2806,6 +3001,12 @@ func (ec *executionContext) unmarshalInputnewUser(ctx context.Context, obj inter
 		case "name":
 			var err error
 			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "photo":
+			var err error
+			it.Photo, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2827,6 +3028,12 @@ func (ec *executionContext) unmarshalInputnewVideo(ctx context.Context, obj inte
 
 	for k, v := range asMap {
 		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "user_id":
 			var err error
 			it.UserID, err = ec.unmarshalNString2string(ctx, v)
@@ -2848,6 +3055,24 @@ func (ec *executionContext) unmarshalInputnewVideo(ctx context.Context, obj inte
 		case "like":
 			var err error
 			it.Like, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dislike":
+			var err error
+			it.Dislike, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "restriction":
+			var err error
+			it.Restriction, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "location":
+			var err error
+			it.Location, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2959,6 +3184,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "deleteVideo":
 			out.Values[i] = ec._Mutation_deleteVideo(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createComment":
+			out.Values[i] = ec._Mutation_createComment(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteComment":
+			out.Values[i] = ec._Mutation_deleteComment(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3420,6 +3655,20 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNComment2Go_BackendᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v model.Comment) graphql.Marshaler {
+	return ec._Comment(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNComment2ᚖGo_BackendᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v *model.Comment) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Comment(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
@@ -4018,6 +4267,18 @@ func (ec *executionContext) marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec.___Type(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOnewComment2Go_BackendᚋgraphᚋmodelᚐNewComment(ctx context.Context, v interface{}) (model.NewComment, error) {
+	return ec.unmarshalInputnewComment(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOnewComment2ᚖGo_BackendᚋgraphᚋmodelᚐNewComment(ctx context.Context, v interface{}) (*model.NewComment, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOnewComment2Go_BackendᚋgraphᚋmodelᚐNewComment(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) unmarshalOnewUser2Go_BackendᚋgraphᚋmodelᚐNewUser(ctx context.Context, v interface{}) (model.NewUser, error) {

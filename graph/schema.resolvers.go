@@ -124,6 +124,14 @@ func (r *mutationResolver) DeleteVideo(ctx context.Context, id string) (bool, er
 	return true, nil
 }
 
+func (r *mutationResolver) CreateComment(ctx context.Context, input *model.NewComment) (*model.Comment, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DeleteComment(ctx context.Context, userid string) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var user []*model.User
 
