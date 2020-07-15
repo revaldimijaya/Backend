@@ -28,6 +28,7 @@ type Comment{
 type Query{
   users: [User!]!
   videos: [Video!]!
+  comment(videoid: Int!): [Comment!]!
   getUserId(userid: String!): User!
   getVideoByUser(userid: String!): [Video!]!
 }
@@ -40,7 +41,6 @@ input newUser {
 }
 
 input newVideo {
-  id: ID!
   user_id: String!
   url: String!
   watch: Int!

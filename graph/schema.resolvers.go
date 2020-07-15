@@ -16,6 +16,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser)
 		ID:         input.ID,
 		Name:       input.Name,
 		Membership: input.Membership,
+		Photo:      input.Photo,
 	}
 
 	_, err := r.DB.Model(&user).Insert()
@@ -38,6 +39,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input *mod
 
 	user.Name = input.Name
 	user.Membership = input.Membership
+	user.Photo = input.Photo
 
 	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
 
@@ -68,10 +70,13 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 
 func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVideo) (*model.Video, error) {
 	video := model.Video{
-		UserID: input.UserID,
-		URL:    input.URL,
-		Watch:  input.Watch,
-		Like:   input.Like,
+		UserID:      input.UserID,
+		URL:         input.URL,
+		Watch:       input.Watch,
+		Like:        input.Like,
+		Dislike:     input.Dislike,
+		Restriction: input.Restriction,
+		Location:    input.Location,
 	}
 
 	_, err := r.DB.Model(&video).Insert()
@@ -96,6 +101,9 @@ func (r *mutationResolver) UpdateVideo(ctx context.Context, id string, input *mo
 	video.URL = input.URL
 	video.Watch = input.Watch
 	video.Like = input.Like
+	video.Dislike = input.Dislike
+	video.Restriction = input.Restriction
+	video.Location = input.Location
 
 	_, updateErr := r.DB.Model(&video).Where("id = ?", id).Update()
 
@@ -125,7 +133,21 @@ func (r *mutationResolver) DeleteVideo(ctx context.Context, id string) (bool, er
 }
 
 func (r *mutationResolver) CreateComment(ctx context.Context, input *model.NewComment) (*model.Comment, error) {
-	panic(fmt.Errorf("not implemented"))
+	comment := model.Comment{
+		UserID:  input.UserID,
+		VideoID: input.VideoID,
+		Comment: input.Comment,
+		Like:    input.Like,
+		Dislike: input.Dislike,
+	}
+
+	_, err := r.DB.Model(&comment).Insert()
+
+	if err != nil {
+		return nil, errors.New("Insert new comment failed")
+	}
+
+	return &comment, nil
 }
 
 func (r *mutationResolver) DeleteComment(ctx context.Context, userid string) (bool, error) {
@@ -157,6 +179,18 @@ func (r *queryResolver) Videos(ctx context.Context) ([]*model.Video, error) {
 	return video, nil
 }
 
+func (r *queryResolver) Comment(ctx context.Context, videoid int) ([]*model.Comment, error) {
+	var comment []*model.Comment
+
+	err := r.DB.Model(&comment).Where("video_id = ?", videoid)
+
+	if err != nil {
+		return nil, errors.New("comment not found!")
+	}
+
+	return comment, nil
+}
+
 func (r *queryResolver) GetUserID(ctx context.Context, userid string) (*model.User, error) {
 	var user model.User
 
@@ -170,7 +204,15 @@ func (r *queryResolver) GetUserID(ctx context.Context, userid string) (*model.Us
 }
 
 func (r *queryResolver) GetVideoByUser(ctx context.Context, userid string) ([]*model.Video, error) {
-	panic(fmt.Errorf("not implemented"))
+	var video []*model.Video
+
+	err := r.DB.Model(&video).Where("user_id = ?", userid)
+
+	if err != nil {
+		return nil, errors.New("video not found!")
+	}
+
+	return video, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
