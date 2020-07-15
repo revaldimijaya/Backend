@@ -65,6 +65,7 @@ type Mutation {
   createVideo (input: newVideo): Video!
   updateVideo (id: ID!, input: newVideo): Video!
   deleteVideo (id: ID!): Boolean!
-  createComment (input: newComment):
+  createComment (input: newComment): Comment!
+  deleteComment (userid: String!): Boolean!
 }
 
