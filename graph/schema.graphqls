@@ -16,7 +16,7 @@ type Video {
   location: String!
   name: String!
   photo: String!
-  thumnail: String!
+  thumbnail: String!
 }
 
 type Comment {
@@ -53,7 +53,7 @@ input newVideo {
   location: String!
   name: String!
   photo: String!
-  thumnail: String!
+  thumbnail: String!
 }
 
 input newComment {

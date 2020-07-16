@@ -86,7 +86,7 @@ type ComplexityRoot struct {
 		Name        func(childComplexity int) int
 		Photo       func(childComplexity int) int
 		Restriction func(childComplexity int) int
-		Thumnail    func(childComplexity int) int
+		Thumbnail   func(childComplexity int) int
 		URL         func(childComplexity int) int
 		UserID      func(childComplexity int) int
 		Watch       func(childComplexity int) int
@@ -391,12 +391,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Video.Restriction(childComplexity), true
 
-	case "Video.thumnail":
-		if e.complexity.Video.Thumnail == nil {
+	case "Video.thumbnail":
+		if e.complexity.Video.Thumbnail == nil {
 			break
 		}
 
-		return e.complexity.Video.Thumnail(childComplexity), true
+		return e.complexity.Video.Thumbnail(childComplexity), true
 
 	case "Video.url":
 		if e.complexity.Video.URL == nil {
@@ -501,7 +501,7 @@ type Video {
   location: String!
   name: String!
   photo: String!
-  thumnail: String!
+  thumbnail: String!
 }
 
 type Comment {
@@ -538,7 +538,7 @@ input newVideo {
   location: String!
   name: String!
   photo: String!
-  thumnail: String!
+  thumbnail: String!
 }
 
 input newComment {
@@ -2056,7 +2056,7 @@ func (ec *executionContext) _Video_photo(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Video_thumnail(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+func (ec *executionContext) _Video_thumbnail(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2073,7 +2073,7 @@ func (ec *executionContext) _Video_thumnail(ctx context.Context, field graphql.C
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Thumnail, nil
+		return obj.Thumbnail, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3283,9 +3283,9 @@ func (ec *executionContext) unmarshalInputnewVideo(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "thumnail":
+		case "thumbnail":
 			var err error
-			it.Thumnail, err = ec.unmarshalNString2string(ctx, v)
+			it.Thumbnail, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3624,8 +3624,8 @@ func (ec *executionContext) _Video(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "thumnail":
-			out.Values[i] = ec._Video_thumnail(ctx, field, obj)
+		case "thumbnail":
+			out.Values[i] = ec._Video_thumbnail(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

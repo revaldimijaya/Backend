@@ -29,7 +29,7 @@ type Video struct {
 	Location    string `json:"location"`
 	Name        string `json:"name"`
 	Photo       string `json:"photo"`
-	Thumnail    string `json:"thumnail"`
+	Thumbnail   string `json:"thumbnail"`
 }
 
 type NewComment struct {
@@ -57,5 +57,5 @@ type NewVideo struct {
 	Location    string `json:"location"`
 	Name        string `json:"name"`
 	Photo       string `json:"photo"`
-	Thumnail    string `json:"thumnail"`
+	Thumbnail   string `json:"thumbnail"`
 }
