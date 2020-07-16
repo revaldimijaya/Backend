@@ -84,7 +84,9 @@ type ComplexityRoot struct {
 		Like        func(childComplexity int) int
 		Location    func(childComplexity int) int
 		Name        func(childComplexity int) int
+		Photo       func(childComplexity int) int
 		Restriction func(childComplexity int) int
+		Thumnail    func(childComplexity int) int
 		URL         func(childComplexity int) int
 		UserID      func(childComplexity int) int
 		Watch       func(childComplexity int) int
@@ -375,12 +377,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Video.Name(childComplexity), true
 
+	case "Video.photo":
+		if e.complexity.Video.Photo == nil {
+			break
+		}
+
+		return e.complexity.Video.Photo(childComplexity), true
+
 	case "Video.restriction":
 		if e.complexity.Video.Restriction == nil {
 			break
 		}
 
 		return e.complexity.Video.Restriction(childComplexity), true
+
+	case "Video.thumnail":
+		if e.complexity.Video.Thumnail == nil {
+			break
+		}
+
+		return e.complexity.Video.Thumnail(childComplexity), true
 
 	case "Video.url":
 		if e.complexity.Video.URL == nil {
@@ -484,6 +500,8 @@ type Video {
   restriction: String!
   location: String!
   name: String!
+  photo: String!
+  thumnail: String!
 }
 
 type Comment {
@@ -519,6 +537,8 @@ input newVideo {
   restriction: String!
   location: String!
   name: String!
+  photo: String!
+  thumnail: String!
 }
 
 input newComment {
@@ -2002,6 +2022,74 @@ func (ec *executionContext) _Video_name(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Video_photo(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Photo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Video_thumnail(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Thumnail, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3189,6 +3277,18 @@ func (ec *executionContext) unmarshalInputnewVideo(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
+		case "photo":
+			var err error
+			it.Photo, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "thumnail":
+			var err error
+			it.Thumnail, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -3516,6 +3616,16 @@ func (ec *executionContext) _Video(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "name":
 			out.Values[i] = ec._Video_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "photo":
+			out.Values[i] = ec._Video_photo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "thumnail":
+			out.Values[i] = ec._Video_thumnail(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

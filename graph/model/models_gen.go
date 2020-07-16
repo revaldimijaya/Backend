@@ -28,6 +28,8 @@ type Video struct {
 	Restriction string `json:"restriction"`
 	Location    string `json:"location"`
 	Name        string `json:"name"`
+	Photo       string `json:"photo"`
+	Thumnail    string `json:"thumnail"`
 }
 
 type NewComment struct {
@@ -54,4 +56,6 @@ type NewVideo struct {
 	Restriction string `json:"restriction"`
 	Location    string `json:"location"`
 	Name        string `json:"name"`
+	Photo       string `json:"photo"`
+	Thumnail    string `json:"thumnail"`
 }

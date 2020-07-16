@@ -15,6 +15,8 @@ type Video {
   restriction: String!
   location: String!
   name: String!
+  photo: String!
+  thumnail: String!
 }
 
 type Comment {
@@ -50,6 +52,8 @@ input newVideo {
   restriction: String!
   location: String!
   name: String!
+  photo: String!
+  thumnail: String!
 }
 
 input newComment {
