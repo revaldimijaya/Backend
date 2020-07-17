@@ -16,6 +16,7 @@ type User struct {
 	Name       string `json:"name"`
 	Photo      string `json:"photo"`
 	Membership string `json:"membership"`
+	Subscriber int    `json:"subscriber"`
 }
 
 type Video struct {
@@ -28,8 +29,11 @@ type Video struct {
 	Restriction string `json:"restriction"`
 	Location    string `json:"location"`
 	Name        string `json:"name"`
-	Photo       string `json:"photo"`
+	Premium     string `json:"premium"`
+	Category    string `json:"category"`
 	Thumbnail   string `json:"thumbnail"`
+	Description string `json:"description"`
+	Visibility  string `json:"visibility"`
 }
 
 type NewComment struct {
@@ -45,6 +49,7 @@ type NewUser struct {
 	Name       string `json:"name"`
 	Photo      string `json:"photo"`
 	Membership string `json:"membership"`
+	Subscriber int    `json:"subscriber"`
 }
 
 type NewVideo struct {
@@ -56,6 +61,9 @@ type NewVideo struct {
 	Restriction string `json:"restriction"`
 	Location    string `json:"location"`
 	Name        string `json:"name"`
-	Photo       string `json:"photo"`
+	Premium     string `json:"premium"`
+	Category    string `json:"category"`
 	Thumbnail   string `json:"thumbnail"`
+	Description string `json:"description"`
+	Visibility  string `json:"visibility"`
 }

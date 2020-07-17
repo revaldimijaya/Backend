@@ -17,6 +17,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser)
 		Name:       input.Name,
 		Membership: input.Membership,
 		Photo:      input.Photo,
+		Subscriber: input.Subscriber,
 	}
 
 	_, err := r.DB.Model(&user).Insert()
@@ -78,8 +79,12 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 		Restriction: input.Restriction,
 		Location:    input.Location,
 		Name:        input.Name,
-		Photo:       input.Photo,
 		Thumbnail:   input.Thumbnail,
+		Premium: input.Premium,
+		Category: input.Category,
+		Description: input.Description,
+		Visibility: input.Visibility,
+
 	}
 
 	_, err := r.DB.Model(&video).Insert()
