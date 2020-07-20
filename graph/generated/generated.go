@@ -67,6 +67,7 @@ type ComplexityRoot struct {
 		Comment        func(childComplexity int, videoid int) int
 		GetUserID      func(childComplexity int, userid string) int
 		GetVideoByUser func(childComplexity int, userid string) int
+		GetVideoID     func(childComplexity int, videoid int) int
 		Users          func(childComplexity int) int
 		Videos         func(childComplexity int) int
 	}
@@ -113,6 +114,7 @@ type QueryResolver interface {
 	Comment(ctx context.Context, videoid int) ([]*model.Comment, error)
 	GetUserID(ctx context.Context, userid string) (*model.User, error)
 	GetVideoByUser(ctx context.Context, userid string) ([]*model.Video, error)
+	GetVideoID(ctx context.Context, videoid int) (*model.Video, error)
 }
 
 type executableSchema struct {
@@ -303,6 +305,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetVideoByUser(childComplexity, args["userid"].(string)), true
+
+	case "Query.getVideoId":
+		if e.complexity.Query.GetVideoID == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getVideoId_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetVideoID(childComplexity, args["videoid"].(int)), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -555,6 +569,7 @@ type Query{
   comment(videoid: Int!): [Comment!]!
   getUserId(userid: String!): User!
   getVideoByUser(userid: String!): [Video!]!
+  getVideoId(videoid: Int!): Video!
 }
 
 input newUser {
@@ -789,6 +804,20 @@ func (ec *executionContext) field_Query_getVideoByUser_args(ctx context.Context,
 		}
 	}
 	args["userid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getVideoId_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["videoid"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["videoid"] = arg0
 	return args, nil
 }
 
@@ -1549,6 +1578,47 @@ func (ec *executionContext) _Query_getVideoByUser(ctx context.Context, field gra
 	res := resTmp.([]*model.Video)
 	fc.Result = res
 	return ec.marshalNVideo2ᚕᚖGo_BackendᚋgraphᚋmodelᚐVideoᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getVideoId(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getVideoId_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetVideoID(rctx, args["videoid"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Video)
+	fc.Result = res
+	return ec.marshalNVideo2ᚖGo_BackendᚋgraphᚋmodelᚐVideo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3701,6 +3771,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getVideoByUser(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getVideoId":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getVideoId(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
