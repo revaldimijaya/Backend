@@ -195,7 +195,7 @@ func (r *queryResolver) Videos(ctx context.Context) ([]*model.Video, error) {
 func (r *queryResolver) Comment(ctx context.Context, videoid int) ([]*model.Comment, error) {
 	var comment []*model.Comment
 
-	err := r.DB.Model(&comment).Where("SELECT * FROM comments WHERE video_id = ?", videoid)
+	err := r.DB.Model(&comment).Where("video_id = ?", videoid).Select()
 
 	if err != nil {
 		return nil, errors.New("comment not found!")
