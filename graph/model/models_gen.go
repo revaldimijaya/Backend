@@ -9,6 +9,9 @@ type Comment struct {
 	Comment string `json:"comment"`
 	Like    int    `json:"like"`
 	Dislike int    `json:"dislike"`
+	Day     int    `json:"day"`
+	Month   int    `json:"month"`
+	Year    int    `json:"year"`
 }
 
 type User struct {
@@ -34,6 +37,9 @@ type Video struct {
 	Thumbnail   string `json:"thumbnail"`
 	Description string `json:"description"`
 	Visibility  string `json:"visibility"`
+	Day         int    `json:"day"`
+	Month       int    `json:"month"`
+	Year        int    `json:"year"`
 }
 
 type NewComment struct {
@@ -42,6 +48,9 @@ type NewComment struct {
 	Comment string `json:"comment"`
 	Like    int    `json:"like"`
 	Dislike int    `json:"dislike"`
+	Day     int    `json:"day"`
+	Month   int    `json:"month"`
+	Year    int    `json:"year"`
 }
 
 type NewUser struct {
@@ -66,4 +75,7 @@ type NewVideo struct {
 	Thumbnail   string `json:"thumbnail"`
 	Description string `json:"description"`
 	Visibility  string `json:"visibility"`
+	Day         int    `json:"day"`
+	Month       int    `json:"month"`
+	Year        int    `json:"year"`
 }

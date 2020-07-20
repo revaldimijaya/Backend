@@ -21,6 +21,9 @@ type Video {
   thumbnail: String!
   description: String!
   visibility: String!
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 type Comment {
@@ -30,6 +33,9 @@ type Comment {
   comment: String!
   like: Int!
   dislike: Int!
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 type Query{
@@ -63,6 +69,9 @@ input newVideo {
   thumbnail: String!
   description: String!
   visibility: String!
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 input newComment {
@@ -71,6 +80,9 @@ input newComment {
   comment: String!
   like: Int!
   dislike: Int!
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 type Mutation {

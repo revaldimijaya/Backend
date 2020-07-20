@@ -84,6 +84,9 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 		Category:    input.Category,
 		Description: input.Description,
 		Visibility:  input.Visibility,
+		Day: input.Day,
+		Month: input.Month,
+		Year: input.Year,
 	}
 
 	_, err := r.DB.Model(&video).Insert()
@@ -146,6 +149,9 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input *model.NewCo
 		Comment: input.Comment,
 		Like:    input.Like,
 		Dislike: input.Dislike,
+		Day: input.Day,
+		Month: input.Month,
+		Year: input.Year,
 	}
 
 	_, err := r.DB.Model(&comment).Insert()

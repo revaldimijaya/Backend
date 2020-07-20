@@ -45,11 +45,14 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Comment struct {
 		Comment func(childComplexity int) int
+		Day     func(childComplexity int) int
 		Dislike func(childComplexity int) int
 		ID      func(childComplexity int) int
 		Like    func(childComplexity int) int
+		Month   func(childComplexity int) int
 		UserID  func(childComplexity int) int
 		VideoID func(childComplexity int) int
+		Year    func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -82,11 +85,13 @@ type ComplexityRoot struct {
 
 	Video struct {
 		Category    func(childComplexity int) int
+		Day         func(childComplexity int) int
 		Description func(childComplexity int) int
 		Dislike     func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Like        func(childComplexity int) int
 		Location    func(childComplexity int) int
+		Month       func(childComplexity int) int
 		Name        func(childComplexity int) int
 		Premium     func(childComplexity int) int
 		Restriction func(childComplexity int) int
@@ -95,6 +100,7 @@ type ComplexityRoot struct {
 		UserID      func(childComplexity int) int
 		Visibility  func(childComplexity int) int
 		Watch       func(childComplexity int) int
+		Year        func(childComplexity int) int
 	}
 }
 
@@ -139,6 +145,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.Comment(childComplexity), true
 
+	case "Comment.day":
+		if e.complexity.Comment.Day == nil {
+			break
+		}
+
+		return e.complexity.Comment.Day(childComplexity), true
+
 	case "Comment.dislike":
 		if e.complexity.Comment.Dislike == nil {
 			break
@@ -160,6 +173,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.Like(childComplexity), true
 
+	case "Comment.month":
+		if e.complexity.Comment.Month == nil {
+			break
+		}
+
+		return e.complexity.Comment.Month(childComplexity), true
+
 	case "Comment.user_id":
 		if e.complexity.Comment.UserID == nil {
 			break
@@ -173,6 +193,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Comment.VideoID(childComplexity), true
+
+	case "Comment.year":
+		if e.complexity.Comment.Year == nil {
+			break
+		}
+
+		return e.complexity.Comment.Year(childComplexity), true
 
 	case "Mutation.createComment":
 		if e.complexity.Mutation.CreateComment == nil {
@@ -374,6 +401,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Video.Category(childComplexity), true
 
+	case "Video.day":
+		if e.complexity.Video.Day == nil {
+			break
+		}
+
+		return e.complexity.Video.Day(childComplexity), true
+
 	case "Video.description":
 		if e.complexity.Video.Description == nil {
 			break
@@ -408,6 +442,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Video.Location(childComplexity), true
+
+	case "Video.month":
+		if e.complexity.Video.Month == nil {
+			break
+		}
+
+		return e.complexity.Video.Month(childComplexity), true
 
 	case "Video.name":
 		if e.complexity.Video.Name == nil {
@@ -464,6 +505,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Video.Watch(childComplexity), true
+
+	case "Video.year":
+		if e.complexity.Video.Year == nil {
+			break
+		}
+
+		return e.complexity.Video.Year(childComplexity), true
 
 	}
 	return 0, false
@@ -552,6 +600,9 @@ type Video {
   thumbnail: String!
   description: String!
   visibility: String!
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 type Comment {
@@ -561,6 +612,9 @@ type Comment {
   comment: String!
   like: Int!
   dislike: Int!
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 type Query{
@@ -594,6 +648,9 @@ input newVideo {
   thumbnail: String!
   description: String!
   visibility: String!
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 input newComment {
@@ -602,6 +659,9 @@ input newComment {
   comment: String!
   like: Int!
   dislike: Int!
+  day: Int!
+  month: Int!
+  year: Int!
 }
 
 type Mutation {
@@ -1045,6 +1105,108 @@ func (ec *executionContext) _Comment_dislike(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Dislike, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Comment_day(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Comment",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Day, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Comment_month(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Comment",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Month, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Comment_year(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Comment",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Year, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2336,6 +2498,108 @@ func (ec *executionContext) _Video_visibility(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Video_day(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Day, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Video_month(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Month, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Video_year(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Year, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3427,6 +3691,24 @@ func (ec *executionContext) unmarshalInputnewComment(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
+		case "day":
+			var err error
+			it.Day, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "month":
+			var err error
+			it.Month, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "year":
+			var err error
+			it.Year, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -3559,6 +3841,24 @@ func (ec *executionContext) unmarshalInputnewVideo(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
+		case "day":
+			var err error
+			it.Day, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "month":
+			var err error
+			it.Month, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "year":
+			var err error
+			it.Year, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -3611,6 +3911,21 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "dislike":
 			out.Values[i] = ec._Comment_dislike(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "day":
+			out.Values[i] = ec._Comment_day(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "month":
+			out.Values[i] = ec._Comment_month(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "year":
+			out.Values[i] = ec._Comment_year(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3930,6 +4245,21 @@ func (ec *executionContext) _Video(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "visibility":
 			out.Values[i] = ec._Video_visibility(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "day":
+			out.Values[i] = ec._Video_day(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "month":
+			out.Values[i] = ec._Video_month(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "year":
+			out.Values[i] = ec._Video_year(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
