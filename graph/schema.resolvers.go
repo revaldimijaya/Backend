@@ -84,9 +84,9 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 		Category:    input.Category,
 		Description: input.Description,
 		Visibility:  input.Visibility,
-		Day: input.Day,
-		Month: input.Month,
-		Year: input.Year,
+		Day:         input.Day,
+		Month:       input.Month,
+		Year:        input.Year,
 	}
 
 	_, err := r.DB.Model(&video).Insert()
@@ -149,9 +149,9 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input *model.NewCo
 		Comment: input.Comment,
 		Like:    input.Like,
 		Dislike: input.Dislike,
-		Day: input.Day,
-		Month: input.Month,
-		Year: input.Year,
+		Day:     input.Day,
+		Month:   input.Month,
+		Year:    input.Year,
 	}
 
 	_, err := r.DB.Model(&comment).Insert()
@@ -219,7 +219,7 @@ func (r *queryResolver) GetUserID(ctx context.Context, userid string) (*model.Us
 func (r *queryResolver) GetVideoByUser(ctx context.Context, userid string) ([]*model.Video, error) {
 	var video []*model.Video
 
-	err := r.DB.Model(&video).Where("user_id = ?", userid)
+	err := r.DB.Model(&video).Where("user_id = ?", userid).Select()
 
 	if err != nil {
 		return nil, errors.New("video not found!")
@@ -238,6 +238,18 @@ func (r *queryResolver) GetVideoID(ctx context.Context, videoid int) (*model.Vid
 	}
 
 	return &video, nil
+}
+
+func (r *queryResolver) GetNextVideo(ctx context.Context, videoid int) ([]*model.Video, error) {
+	var video []*model.Video
+
+	err := r.DB.Model(&video).Where("id != ?", videoid).Select()
+
+	if err != nil {
+		return nil, errors.New("video not found!")
+	}
+
+	return video, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

@@ -45,6 +45,7 @@ type Query{
   getUserId(userid: String!): User!
   getVideoByUser(userid: String!): [Video!]!
   getVideoId(videoid: Int!): Video!
+  getNextVideo(videoid: Int!): [Video!]!
 }
 
 input newUser {
