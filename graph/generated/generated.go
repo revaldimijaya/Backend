@@ -97,6 +97,7 @@ type ComplexityRoot struct {
 		GetUserID      func(childComplexity int, userid string) int
 		GetVideoByUser func(childComplexity int, userid string) int
 		GetVideoID     func(childComplexity int, videoid int) int
+		GetVideoLike   func(childComplexity int, videoid int, userid int, typeArg string) int
 		Users          func(childComplexity int) int
 		Videos         func(childComplexity int) int
 	}
@@ -177,6 +178,7 @@ type QueryResolver interface {
 	GetVideoByUser(ctx context.Context, userid string) ([]*model.Video, error)
 	GetVideoID(ctx context.Context, videoid int) (*model.Video, error)
 	GetNextVideo(ctx context.Context, videoid int) ([]*model.Video, error)
+	GetVideoLike(ctx context.Context, videoid int, userid int, typeArg string) ([]*model.LikeVideo, error)
 }
 
 type executableSchema struct {
@@ -544,6 +546,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetVideoID(childComplexity, args["videoid"].(int)), true
+
+	case "Query.getVideoLike":
+		if e.complexity.Query.GetVideoLike == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getVideoLike_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetVideoLike(childComplexity, args["videoid"].(int), args["userid"].(int), args["type"].(string)), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -1004,6 +1018,8 @@ type Query{
   getVideoByUser(userid: String!): [Video!]!
   getVideoId(videoid: Int!): Video!
   getNextVideo(videoid: Int!): [Video!]!
+
+  getVideoLike(videoid: Int!, userid: Int!, type: String!): [LikeVideo!]!
 }
 
 input newUser {
@@ -1384,6 +1400,36 @@ func (ec *executionContext) field_Query_getVideoId_args(ctx context.Context, raw
 		}
 	}
 	args["videoid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getVideoLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["videoid"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["videoid"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userid"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["type"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg2
 	return args, nil
 }
 
@@ -2900,6 +2946,47 @@ func (ec *executionContext) _Query_getNextVideo(ctx context.Context, field graph
 	res := resTmp.([]*model.Video)
 	fc.Result = res
 	return ec.marshalNVideo2ᚕᚖGo_BackendᚋgraphᚋmodelᚐVideoᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getVideoLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getVideoLike_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetVideoLike(rctx, args["videoid"].(int), args["userid"].(int), args["type"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.LikeVideo)
+	fc.Result = res
+	return ec.marshalNLikeVideo2ᚕᚖGo_BackendᚋgraphᚋmodelᚐLikeVideoᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -6030,6 +6117,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "getVideoLike":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getVideoLike(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -6674,6 +6775,57 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNLikeVideo2Go_BackendᚋgraphᚋmodelᚐLikeVideo(ctx context.Context, sel ast.SelectionSet, v model.LikeVideo) graphql.Marshaler {
+	return ec._LikeVideo(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLikeVideo2ᚕᚖGo_BackendᚋgraphᚋmodelᚐLikeVideoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.LikeVideo) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLikeVideo2ᚖGo_BackendᚋgraphᚋmodelᚐLikeVideo(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNLikeVideo2ᚖGo_BackendᚋgraphᚋmodelᚐLikeVideo(ctx context.Context, sel ast.SelectionSet, v *model.LikeVideo) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._LikeVideo(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

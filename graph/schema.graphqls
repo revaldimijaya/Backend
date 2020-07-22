@@ -92,6 +92,8 @@ type Query{
   getVideoByUser(userid: String!): [Video!]!
   getVideoId(videoid: Int!): Video!
   getNextVideo(videoid: Int!): [Video!]!
+
+  getVideoLike(videoid: Int!, userid: Int!, type: String!): [LikeVideo!]!
 }
 
 input newUser {

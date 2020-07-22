@@ -157,19 +157,12 @@ func (r *mutationResolver) VideoLike(ctx context.Context, id int, userid string,
 		insert := model.LikeVideo{
 			UserID:  userid,
 			VideoID: id,
+			Type:    typeArg,
 		}
 		_, err_insert := r.DB.Model(&insert).Insert()
 
 		if err_insert != nil {
 			return false, errors.New("insert video like failed")
-		}
-
-		if typeArg == "like" {
-			video.Like += 1
-			r.DB.Model(&video).Where("id = ?", id).Update()
-		} else {
-			video.Dislike += 1
-			r.DB.Model(&video).Where("id = ?", id).Update()
 		}
 
 		return true, nil
@@ -178,31 +171,19 @@ func (r *mutationResolver) VideoLike(ctx context.Context, id int, userid string,
 	diff_like := r.DB.Model(&like).Where("video_id = ? AND user_id = ? AND type = ?", id, userid, "like").First()
 
 	if diff_like == nil && typeArg == "like" {
-		video.Like -= 1
-		r.DB.Model(&video).Where("id = ?", id).Update()
 		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
 
-	} else if diff_like == nil && typeArg == "dislike"{
-		video.Like -= 1
-		video.Dislike += 1
+	} else if diff_like == nil && typeArg == "dislike" {
 		like.Type = "dislike"
-		r.DB.Model(&video).Where("id = ?", id).Update()
 		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
 
-	} else if diff_like != nil && typeArg == "dislike"{
-		video.Dislike -= 1
-		r.DB.Model(&video).Where("id = ?", id).Update()
+	} else if diff_like != nil && typeArg == "dislike" {
 		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
 
-	} else if diff_like != nil && typeArg == "like"{
-		video.Like += 1
-		video.Dislike -= 1
+	} else if diff_like != nil && typeArg == "like" {
 		like.Type = "like"
-		r.DB.Model(&video).Where("id = ?", id).Update()
 		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
 	}
-
-
 
 	return true, nil
 }
@@ -341,6 +322,14 @@ func (r *queryResolver) GetNextVideo(ctx context.Context, videoid int) ([]*model
 	}
 
 	return video, nil
+}
+
+func (r *queryResolver) GetVideoLike(ctx context.Context, videoid int, userid int, typeArg string) ([]*model.LikeVideo, error) {
+	var like []*model.LikeVideo
+
+	r.DB.Model(&like).Where("video_id = ? && user_id = ? && type = ?",videoid, userid, typeArg).Select()
+
+	return like, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
