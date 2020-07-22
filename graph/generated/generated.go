@@ -97,7 +97,7 @@ type ComplexityRoot struct {
 		GetUserID      func(childComplexity int, userid string) int
 		GetVideoByUser func(childComplexity int, userid string) int
 		GetVideoID     func(childComplexity int, videoid int) int
-		GetVideoLike   func(childComplexity int, videoid int, userid int, typeArg string) int
+		GetVideoLike   func(childComplexity int, videoid int, typeArg string) int
 		Users          func(childComplexity int) int
 		Videos         func(childComplexity int) int
 	}
@@ -178,7 +178,7 @@ type QueryResolver interface {
 	GetVideoByUser(ctx context.Context, userid string) ([]*model.Video, error)
 	GetVideoID(ctx context.Context, videoid int) (*model.Video, error)
 	GetNextVideo(ctx context.Context, videoid int) ([]*model.Video, error)
-	GetVideoLike(ctx context.Context, videoid int, userid int, typeArg string) ([]*model.LikeVideo, error)
+	GetVideoLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeVideo, error)
 }
 
 type executableSchema struct {
@@ -557,7 +557,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetVideoLike(childComplexity, args["videoid"].(int), args["userid"].(int), args["type"].(string)), true
+		return e.complexity.Query.GetVideoLike(childComplexity, args["videoid"].(int), args["type"].(string)), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -1019,7 +1019,7 @@ type Query{
   getVideoId(videoid: Int!): Video!
   getNextVideo(videoid: Int!): [Video!]!
 
-  getVideoLike(videoid: Int!, userid: Int!, type: String!): [LikeVideo!]!
+  getVideoLike(videoid: Int!, type: String!): [LikeVideo!]!
 }
 
 input newUser {
@@ -1414,22 +1414,14 @@ func (ec *executionContext) field_Query_getVideoLike_args(ctx context.Context, r
 		}
 	}
 	args["videoid"] = arg0
-	var arg1 int
-	if tmp, ok := rawArgs["userid"]; ok {
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userid"] = arg1
-	var arg2 string
+	var arg1 string
 	if tmp, ok := rawArgs["type"]; ok {
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["type"] = arg2
+	args["type"] = arg1
 	return args, nil
 }
 
@@ -2972,7 +2964,7 @@ func (ec *executionContext) _Query_getVideoLike(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetVideoLike(rctx, args["videoid"].(int), args["userid"].(int), args["type"].(string))
+		return ec.resolvers.Query().GetVideoLike(rctx, args["videoid"].(int), args["type"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
