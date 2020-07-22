@@ -152,7 +152,11 @@ func (r *mutationResolver) VideoLike(ctx context.Context, id int, userid string)
 	err_like := r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).First()
 
 	if err_like != nil {
-		_,err_insert := r.DB.Model(&like).Insert()
+		insert := model.LikeVideo{
+			UserID: userid,
+			VideoID: id,
+		}
+		_,err_insert := r.DB.Model(&insert).Insert()
 
 		if err_insert != nil {
 			return false, errors.New("insert video like failed")
