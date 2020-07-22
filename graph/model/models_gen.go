@@ -14,6 +14,19 @@ type Comment struct {
 	Year    int    `json:"year"`
 }
 
+type Reply struct {
+	ID        string `json:"id"`
+	UserID    string `json:"user_id"`
+	VideoID   int    `json:"video_id"`
+	CommentID int    `json:"Comment_Id"`
+	Reply     string `json:"reply"`
+	Like      int    `json:"like"`
+	Dislike   int    `json:"dislike"`
+	Day       int    `json:"day"`
+	Month     int    `json:"month"`
+	Year      int    `json:"year"`
+}
+
 type User struct {
 	ID         string `json:"id"`
 	Name       string `json:"name"`
@@ -51,6 +64,18 @@ type NewComment struct {
 	Day     int    `json:"day"`
 	Month   int    `json:"month"`
 	Year    int    `json:"year"`
+}
+
+type NewReply struct {
+	UserID    string `json:"user_id"`
+	VideoID   int    `json:"video_id"`
+	CommentID int    `json:"Comment_Id"`
+	Reply     string `json:"reply"`
+	Like      int    `json:"like"`
+	Dislike   int    `json:"dislike"`
+	Day       int    `json:"day"`
+	Month     int    `json:"month"`
+	Year      int    `json:"year"`
 }
 
 type NewUser struct {

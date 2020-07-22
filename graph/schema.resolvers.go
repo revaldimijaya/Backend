@@ -124,6 +124,34 @@ func (r *mutationResolver) UpdateVideo(ctx context.Context, id string, input *mo
 	return &video, nil
 }
 
+func (r *mutationResolver) Watch(ctx context.Context, id int) (bool, error) {
+	var video model.Video
+
+	err := r.DB.Model(&video).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("video not found!")
+	}
+
+	video.Watch += 1
+
+	return true, nil
+}
+
+func (r *mutationResolver) VideoLike(ctx context.Context, id int) (bool, error) {
+	var video model.Video
+
+	err := r.DB.Model(&video).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("video not found!")
+	}
+}
+
+func (r *mutationResolver) VideoDislike(ctx context.Context, id int) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *mutationResolver) DeleteVideo(ctx context.Context, id string) (bool, error) {
 	var video model.Video
 
@@ -260,3 +288,16 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *mutationResolver) Like(ctx context.Context, id int) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *mutationResolver) Dislike(ctx context.Context, id int) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}

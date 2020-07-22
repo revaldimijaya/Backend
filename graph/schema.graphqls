@@ -38,6 +38,38 @@ type Comment {
   year: Int!
 }
 
+type Reply {
+  id: ID!
+  user_id: String!
+  video_id: Int!
+  Comment_Id: Int!
+  reply: String!
+  like: Int!
+  dislike: Int!
+  day: Int!
+  month: Int!
+  year: Int!
+}
+
+type LikeVideo {
+  id: ID!
+  user_id: String!
+  video_id: Int!
+
+}
+
+type newReply {
+  user_id: String!
+  video_id: Int!
+  Comment_Id: Int!
+  reply: String!
+  like: Int!
+  dislike: Int!
+  day: Int!
+  month: Int!
+  year: Int!
+}
+
 type Query{
   users: [User!]!
   videos: [Video!]!
@@ -92,6 +124,9 @@ type Mutation {
   deleteUser (id: String!): Boolean!
   createVideo (input: newVideo): Video!
   updateVideo (id: ID!, input: newVideo): Video!
+  watch (id: Int!): Boolean!
+  videoLike(id: Int!): Boolean!
+  videoDislike(id: Int!): Boolean!
   deleteVideo (id: ID!): Boolean!
   createComment (input: newComment): Comment!
   deleteComment (userid: String!): Boolean!
