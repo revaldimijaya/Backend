@@ -138,7 +138,7 @@ func (r *mutationResolver) Watch(ctx context.Context, id int) (bool, error) {
 	return true, nil
 }
 
-func (r *mutationResolver) VideoLike(ctx context.Context, id int) (bool, error) {
+func (r *mutationResolver) VideoLike(ctx context.Context, id int, userid string) (bool, error) {
 	var video model.Video
 
 	err := r.DB.Model(&video).Where("id = ?", id).First()
@@ -146,9 +146,48 @@ func (r *mutationResolver) VideoLike(ctx context.Context, id int) (bool, error) 
 	if err != nil {
 		return false, errors.New("video not found!")
 	}
+
+	var like model.LikeVideo
+
+	err_like := r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).First()
+
+	if err_like != nil {
+		_,err_insert := r.DB.Model(&like).Insert()
+
+		if err_insert != nil {
+			return false, errors.New("insert video like failed")
+		}
+
+		video.Like += 1
+		r.DB.Model(&video).Where("id = ?", id).Update()
+
+		return true,nil
+	}
+
+	video.Like -= 1
+	r.DB.Model(&video).Where("id = ?", id).Update()
+	r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
+
+	return true, nil
 }
 
-func (r *mutationResolver) VideoDislike(ctx context.Context, id int) (bool, error) {
+func (r *mutationResolver) VideoDislike(ctx context.Context, id int, userid string) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) CommentLike(ctx context.Context, id int, userid string) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) CommentDislike(ctx context.Context, id int, userid string) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) ReplyLike(ctx context.Context, id int, userid string) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) ReplyDislike(ctx context.Context, id int, userid string) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

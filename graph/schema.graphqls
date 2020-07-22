@@ -55,7 +55,18 @@ type LikeVideo {
   id: ID!
   user_id: String!
   video_id: Int!
+}
 
+type LikeComment {
+  id: ID!
+  user_id: String!
+  comment_id: Int!
+}
+
+type LikeReply {
+  id: ID!
+  user_id: String!
+  reply_id: Int!
 }
 
 type newReply {
@@ -125,8 +136,16 @@ type Mutation {
   createVideo (input: newVideo): Video!
   updateVideo (id: ID!, input: newVideo): Video!
   watch (id: Int!): Boolean!
-  videoLike(id: Int!): Boolean!
-  videoDislike(id: Int!): Boolean!
+
+  videoLike(id: Int!, userid: String!): Boolean!
+  videoDislike(id: Int!, userid: String!): Boolean!
+
+  commentLike(id: Int!, userid: String!): Boolean!
+  commentDislike(id: Int!, userid: String!): Boolean!
+
+  replyLike(id: Int!, userid: String!): Boolean!
+  replyDislike(id: Int!, userid: String!): Boolean!
+
   deleteVideo (id: ID!): Boolean!
   createComment (input: newComment): Comment!
   deleteComment (userid: String!): Boolean!

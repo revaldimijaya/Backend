@@ -14,6 +14,24 @@ type Comment struct {
 	Year    int    `json:"year"`
 }
 
+type LikeComment struct {
+	ID        string `json:"id"`
+	UserID    string `json:"user_id"`
+	CommentID int    `json:"comment_id"`
+}
+
+type LikeReply struct {
+	ID      string `json:"id"`
+	UserID  string `json:"user_id"`
+	ReplyID int    `json:"reply_id"`
+}
+
+type LikeVideo struct {
+	ID      string `json:"id"`
+	UserID  string `json:"user_id"`
+	VideoID int    `json:"video_id"`
+}
+
 type Reply struct {
 	ID        string `json:"id"`
 	UserID    string `json:"user_id"`
