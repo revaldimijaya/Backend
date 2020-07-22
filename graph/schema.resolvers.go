@@ -134,6 +134,7 @@ func (r *mutationResolver) Watch(ctx context.Context, id int) (bool, error) {
 	}
 
 	video.Watch += 1
+	r.DB.Model(&video).Where("id = ?", id).Update()
 
 	return true, nil
 }
