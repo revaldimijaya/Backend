@@ -58,37 +58,37 @@ type ComplexityRoot struct {
 	LikeComment struct {
 		CommentID func(childComplexity int) int
 		ID        func(childComplexity int) int
+		Type      func(childComplexity int) int
 		UserID    func(childComplexity int) int
 	}
 
 	LikeReply struct {
 		ID      func(childComplexity int) int
 		ReplyID func(childComplexity int) int
+		Type    func(childComplexity int) int
 		UserID  func(childComplexity int) int
 	}
 
 	LikeVideo struct {
 		ID      func(childComplexity int) int
+		Type    func(childComplexity int) int
 		UserID  func(childComplexity int) int
 		VideoID func(childComplexity int) int
 	}
 
 	Mutation struct {
-		CommentDislike func(childComplexity int, id int, userid string) int
-		CommentLike    func(childComplexity int, id int, userid string) int
-		CreateComment  func(childComplexity int, input *model.NewComment) int
-		CreateUser     func(childComplexity int, input *model.NewUser) int
-		CreateVideo    func(childComplexity int, input *model.NewVideo) int
-		DeleteComment  func(childComplexity int, userid string) int
-		DeleteUser     func(childComplexity int, id string) int
-		DeleteVideo    func(childComplexity int, id string) int
-		ReplyDislike   func(childComplexity int, id int, userid string) int
-		ReplyLike      func(childComplexity int, id int, userid string) int
-		UpdateUser     func(childComplexity int, id string, input *model.NewUser) int
-		UpdateVideo    func(childComplexity int, id string, input *model.NewVideo) int
-		VideoDislike   func(childComplexity int, id int, userid string) int
-		VideoLike      func(childComplexity int, id int, userid string) int
-		Watch          func(childComplexity int, id int) int
+		CommentLike   func(childComplexity int, id int, userid string, typeArg string) int
+		CreateComment func(childComplexity int, input *model.NewComment) int
+		CreateUser    func(childComplexity int, input *model.NewUser) int
+		CreateVideo   func(childComplexity int, input *model.NewVideo) int
+		DeleteComment func(childComplexity int, userid string) int
+		DeleteUser    func(childComplexity int, id string) int
+		DeleteVideo   func(childComplexity int, id string) int
+		ReplyLike     func(childComplexity int, id int, userid string, typeArg string) int
+		UpdateUser    func(childComplexity int, id string, input *model.NewUser) int
+		UpdateVideo   func(childComplexity int, id string, input *model.NewVideo) int
+		VideoLike     func(childComplexity int, id int, userid string, typeArg string) int
+		Watch         func(childComplexity int, id int) int
 	}
 
 	Query struct {
@@ -162,12 +162,9 @@ type MutationResolver interface {
 	CreateVideo(ctx context.Context, input *model.NewVideo) (*model.Video, error)
 	UpdateVideo(ctx context.Context, id string, input *model.NewVideo) (*model.Video, error)
 	Watch(ctx context.Context, id int) (bool, error)
-	VideoLike(ctx context.Context, id int, userid string) (bool, error)
-	VideoDislike(ctx context.Context, id int, userid string) (bool, error)
-	CommentLike(ctx context.Context, id int, userid string) (bool, error)
-	CommentDislike(ctx context.Context, id int, userid string) (bool, error)
-	ReplyLike(ctx context.Context, id int, userid string) (bool, error)
-	ReplyDislike(ctx context.Context, id int, userid string) (bool, error)
+	VideoLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
+	CommentLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
+	ReplyLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
 	DeleteVideo(ctx context.Context, id string) (bool, error)
 	CreateComment(ctx context.Context, input *model.NewComment) (*model.Comment, error)
 	DeleteComment(ctx context.Context, userid string) (bool, error)
@@ -274,6 +271,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LikeComment.ID(childComplexity), true
 
+	case "LikeComment.type":
+		if e.complexity.LikeComment.Type == nil {
+			break
+		}
+
+		return e.complexity.LikeComment.Type(childComplexity), true
+
 	case "LikeComment.user_id":
 		if e.complexity.LikeComment.UserID == nil {
 			break
@@ -295,6 +299,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LikeReply.ReplyID(childComplexity), true
 
+	case "LikeReply.type":
+		if e.complexity.LikeReply.Type == nil {
+			break
+		}
+
+		return e.complexity.LikeReply.Type(childComplexity), true
+
 	case "LikeReply.user_id":
 		if e.complexity.LikeReply.UserID == nil {
 			break
@@ -308,6 +319,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.LikeVideo.ID(childComplexity), true
+
+	case "LikeVideo.type":
+		if e.complexity.LikeVideo.Type == nil {
+			break
+		}
+
+		return e.complexity.LikeVideo.Type(childComplexity), true
 
 	case "LikeVideo.user_id":
 		if e.complexity.LikeVideo.UserID == nil {
@@ -323,18 +341,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LikeVideo.VideoID(childComplexity), true
 
-	case "Mutation.commentDislike":
-		if e.complexity.Mutation.CommentDislike == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_commentDislike_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CommentDislike(childComplexity, args["id"].(int), args["userid"].(string)), true
-
 	case "Mutation.commentLike":
 		if e.complexity.Mutation.CommentLike == nil {
 			break
@@ -345,7 +351,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CommentLike(childComplexity, args["id"].(int), args["userid"].(string)), true
+		return e.complexity.Mutation.CommentLike(childComplexity, args["id"].(int), args["userid"].(string), args["type"].(string)), true
 
 	case "Mutation.createComment":
 		if e.complexity.Mutation.CreateComment == nil {
@@ -419,18 +425,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteVideo(childComplexity, args["id"].(string)), true
 
-	case "Mutation.replyDislike":
-		if e.complexity.Mutation.ReplyDislike == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_replyDislike_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.ReplyDislike(childComplexity, args["id"].(int), args["userid"].(string)), true
-
 	case "Mutation.replyLike":
 		if e.complexity.Mutation.ReplyLike == nil {
 			break
@@ -441,7 +435,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ReplyLike(childComplexity, args["id"].(int), args["userid"].(string)), true
+		return e.complexity.Mutation.ReplyLike(childComplexity, args["id"].(int), args["userid"].(string), args["type"].(string)), true
 
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -467,18 +461,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateVideo(childComplexity, args["id"].(string), args["input"].(*model.NewVideo)), true
 
-	case "Mutation.videoDislike":
-		if e.complexity.Mutation.VideoDislike == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_videoDislike_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.VideoDislike(childComplexity, args["id"].(int), args["userid"].(string)), true
-
 	case "Mutation.videoLike":
 		if e.complexity.Mutation.VideoLike == nil {
 			break
@@ -489,7 +471,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.VideoLike(childComplexity, args["id"].(int), args["userid"].(string)), true
+		return e.complexity.Mutation.VideoLike(childComplexity, args["id"].(int), args["userid"].(string), args["type"].(string)), true
 
 	case "Mutation.watch":
 		if e.complexity.Mutation.Watch == nil {
@@ -985,18 +967,21 @@ type LikeVideo {
   id: ID!
   user_id: String!
   video_id: Int!
+  type: String!
 }
 
 type LikeComment {
   id: ID!
   user_id: String!
   comment_id: Int!
+  type: String!
 }
 
 type LikeReply {
   id: ID!
   user_id: String!
   reply_id: Int!
+  type: String!
 }
 
 type newReply {
@@ -1067,14 +1052,11 @@ type Mutation {
   updateVideo (id: ID!, input: newVideo): Video!
   watch (id: Int!): Boolean!
 
-  videoLike(id: Int!, userid: String!): Boolean!
-  videoDislike(id: Int!, userid: String!): Boolean!
+  videoLike(id: Int!, userid: String!, type: String!): Boolean!
 
-  commentLike(id: Int!, userid: String!): Boolean!
-  commentDislike(id: Int!, userid: String!): Boolean!
+  commentLike(id: Int!, userid: String!, type: String!): Boolean!
 
-  replyLike(id: Int!, userid: String!): Boolean!
-  replyDislike(id: Int!, userid: String!): Boolean!
+  replyLike(id: Int!, userid: String!, type: String!): Boolean!
 
   deleteVideo (id: ID!): Boolean!
   createComment (input: newComment): Comment!
@@ -1088,28 +1070,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) field_Mutation_commentDislike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["userid"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userid"] = arg1
-	return args, nil
-}
 
 func (ec *executionContext) field_Mutation_commentLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1130,6 +1090,14 @@ func (ec *executionContext) field_Mutation_commentLike_args(ctx context.Context,
 		}
 	}
 	args["userid"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["type"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg2
 	return args, nil
 }
 
@@ -1217,28 +1185,6 @@ func (ec *executionContext) field_Mutation_deleteVideo_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_replyDislike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["userid"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userid"] = arg1
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_replyLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1258,6 +1204,14 @@ func (ec *executionContext) field_Mutation_replyLike_args(ctx context.Context, r
 		}
 	}
 	args["userid"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["type"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg2
 	return args, nil
 }
 
@@ -1305,28 +1259,6 @@ func (ec *executionContext) field_Mutation_updateVideo_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_videoDislike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["userid"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userid"] = arg1
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_videoLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1346,6 +1278,14 @@ func (ec *executionContext) field_Mutation_videoLike_args(ctx context.Context, r
 		}
 	}
 	args["userid"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["type"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg2
 	return args, nil
 }
 
@@ -1891,6 +1831,40 @@ func (ec *executionContext) _LikeComment_comment_id(ctx context.Context, field g
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _LikeComment_type(ctx context.Context, field graphql.CollectedField, obj *model.LikeComment) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LikeComment",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _LikeReply_id(ctx context.Context, field graphql.CollectedField, obj *model.LikeReply) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1993,6 +1967,40 @@ func (ec *executionContext) _LikeReply_reply_id(ctx context.Context, field graph
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _LikeReply_type(ctx context.Context, field graphql.CollectedField, obj *model.LikeReply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LikeReply",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _LikeVideo_id(ctx context.Context, field graphql.CollectedField, obj *model.LikeVideo) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2093,6 +2101,40 @@ func (ec *executionContext) _LikeVideo_video_id(ctx context.Context, field graph
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LikeVideo_type(ctx context.Context, field graphql.CollectedField, obj *model.LikeVideo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LikeVideo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2365,48 +2407,7 @@ func (ec *executionContext) _Mutation_videoLike(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().VideoLike(rctx, args["id"].(int), args["userid"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_videoDislike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_videoDislike_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().VideoDislike(rctx, args["id"].(int), args["userid"].(string))
+		return ec.resolvers.Mutation().VideoLike(rctx, args["id"].(int), args["userid"].(string), args["type"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2447,48 +2448,7 @@ func (ec *executionContext) _Mutation_commentLike(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CommentLike(rctx, args["id"].(int), args["userid"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_commentDislike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_commentDislike_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CommentDislike(rctx, args["id"].(int), args["userid"].(string))
+		return ec.resolvers.Mutation().CommentLike(rctx, args["id"].(int), args["userid"].(string), args["type"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2529,48 +2489,7 @@ func (ec *executionContext) _Mutation_replyLike(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ReplyLike(rctx, args["id"].(int), args["userid"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_replyDislike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_replyDislike_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ReplyDislike(rctx, args["id"].(int), args["userid"].(string))
+		return ec.resolvers.Mutation().ReplyLike(rctx, args["id"].(int), args["userid"].(string), args["type"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5812,6 +5731,11 @@ func (ec *executionContext) _LikeComment(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "type":
+			out.Values[i] = ec._LikeComment_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5849,6 +5773,11 @@ func (ec *executionContext) _LikeReply(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "type":
+			out.Values[i] = ec._LikeReply_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5883,6 +5812,11 @@ func (ec *executionContext) _LikeVideo(ctx context.Context, sel ast.SelectionSet
 			}
 		case "video_id":
 			out.Values[i] = ec._LikeVideo_video_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "type":
+			out.Values[i] = ec._LikeVideo_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -5947,28 +5881,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "videoDislike":
-			out.Values[i] = ec._Mutation_videoDislike(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "commentLike":
 			out.Values[i] = ec._Mutation_commentLike(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "commentDislike":
-			out.Values[i] = ec._Mutation_commentDislike(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "replyLike":
 			out.Values[i] = ec._Mutation_replyLike(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "replyDislike":
-			out.Values[i] = ec._Mutation_replyDislike(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

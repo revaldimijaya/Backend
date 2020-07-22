@@ -139,7 +139,7 @@ func (r *mutationResolver) Watch(ctx context.Context, id int) (bool, error) {
 	return true, nil
 }
 
-func (r *mutationResolver) VideoLike(ctx context.Context, id int, userid string) (bool, error) {
+func (r *mutationResolver) VideoLike(ctx context.Context, id int, userid string, typeArg string) (bool, error) {
 	var video model.Video
 
 	err := r.DB.Model(&video).Where("id = ?", id).First()
@@ -153,46 +153,65 @@ func (r *mutationResolver) VideoLike(ctx context.Context, id int, userid string)
 	err_like := r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).First()
 
 	if err_like != nil {
+
 		insert := model.LikeVideo{
-			UserID: userid,
+			UserID:  userid,
 			VideoID: id,
 		}
-		_,err_insert := r.DB.Model(&insert).Insert()
+		_, err_insert := r.DB.Model(&insert).Insert()
 
 		if err_insert != nil {
 			return false, errors.New("insert video like failed")
 		}
 
-		video.Like += 1
-		r.DB.Model(&video).Where("id = ?", id).Update()
+		if typeArg == "like" {
+			video.Like += 1
+			r.DB.Model(&video).Where("id = ?", id).Update()
+		} else {
+			video.Dislike += 1
+			r.DB.Model(&video).Where("id = ?", id).Update()
+		}
 
-		return true,nil
+		return true, nil
 	}
 
-	video.Like -= 1
-	r.DB.Model(&video).Where("id = ?", id).Update()
-	r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
+	diff_like := r.DB.Model(&like).Where("video_id = ? AND user_id = ? AND type = ?", id, userid, "like").First()
+
+	if diff_like == nil && typeArg == "like" {
+		video.Like -= 1
+		r.DB.Model(&video).Where("id = ?", id).Update()
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
+
+	} else if diff_like == nil && typeArg == "dislike"{
+		video.Like -= 1
+		video.Dislike += 1
+		like.Type = "dislike"
+		r.DB.Model(&video).Where("id = ?", id).Update()
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
+
+	} else if diff_like != nil && typeArg == "dislike"{
+		video.Dislike -= 1
+		r.DB.Model(&video).Where("id = ?", id).Update()
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
+
+	} else if diff_like != nil && typeArg == "like"{
+		video.Like += 1
+		video.Dislike -= 1
+		like.Type = "like"
+		r.DB.Model(&video).Where("id = ?", id).Update()
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
+	}
+
+
 
 	return true, nil
 }
 
-func (r *mutationResolver) VideoDislike(ctx context.Context, id int, userid string) (bool, error) {
+func (r *mutationResolver) CommentLike(ctx context.Context, id int, userid string, typeArg string) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) CommentLike(ctx context.Context, id int, userid string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) CommentDislike(ctx context.Context, id int, userid string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) ReplyLike(ctx context.Context, id int, userid string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) ReplyDislike(ctx context.Context, id int, userid string) (bool, error) {
+func (r *mutationResolver) ReplyLike(ctx context.Context, id int, userid string, typeArg string) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -339,6 +358,15 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *mutationResolver) VideoDislike(ctx context.Context, id int, userid string) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *mutationResolver) CommentDislike(ctx context.Context, id int, userid string) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *mutationResolver) ReplyDislike(ctx context.Context, id int, userid string) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
 func (r *mutationResolver) Like(ctx context.Context, id int) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }

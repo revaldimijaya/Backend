@@ -18,18 +18,21 @@ type LikeComment struct {
 	ID        string `json:"id"`
 	UserID    string `json:"user_id"`
 	CommentID int    `json:"comment_id"`
+	Type      string `json:"type"`
 }
 
 type LikeReply struct {
 	ID      string `json:"id"`
 	UserID  string `json:"user_id"`
 	ReplyID int    `json:"reply_id"`
+	Type    string `json:"type"`
 }
 
 type LikeVideo struct {
 	ID      string `json:"id"`
 	UserID  string `json:"user_id"`
 	VideoID int    `json:"video_id"`
+	Type    string `json:"type"`
 }
 
 type Reply struct {
