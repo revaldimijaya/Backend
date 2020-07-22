@@ -48,6 +48,12 @@ type Reply struct {
 	Year      int    `json:"year"`
 }
 
+type Subscribe struct {
+	ID          string `json:"id"`
+	UserID      string `json:"user_id"`
+	SubscribeTo string `json:"subscribe_to"`
+}
+
 type User struct {
 	ID         string `json:"id"`
 	Name       string `json:"name"`

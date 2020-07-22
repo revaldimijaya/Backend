@@ -239,6 +239,21 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, userid string) (bo
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *mutationResolver) CreateSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error) {
+	subs := model.Subscribe{
+		UserID:      userid,
+		SubscribeTo: subscribeto,
+	}
+
+	_,err := r.DB.Model(&subs).Insert()
+
+	if err != nil {
+		return nil, errors.New("Insert new subscribe failed")
+	}
+
+	return &subs, nil
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var user []*model.User
 
@@ -332,6 +347,22 @@ func (r *queryResolver) GetVideoLike(ctx context.Context, videoid int, typeArg s
 	return like, nil
 }
 
+func (r *queryResolver) GetCommentLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeComment, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) GetReplyLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeReply, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) GetSubscribe(ctx context.Context, userid string) ([]*model.Subscribe, error) {
+	var subs []*model.Subscribe
+
+	r.DB.Model(&subs).Where("user_id = ?",userid).Select()
+
+	return subs, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
@@ -340,25 +371,3 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *mutationResolver) VideoDislike(ctx context.Context, id int, userid string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *mutationResolver) CommentDislike(ctx context.Context, id int, userid string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *mutationResolver) ReplyDislike(ctx context.Context, id int, userid string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *mutationResolver) Like(ctx context.Context, id int) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *mutationResolver) Dislike(ctx context.Context, id int) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
-}

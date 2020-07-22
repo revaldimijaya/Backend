@@ -72,6 +72,12 @@ type LikeReply {
   type: String!
 }
 
+type Subscribe {
+  id: ID!
+  user_id: String!
+  subscribe_to: String!
+}
+
 type newReply {
   user_id: String!
   video_id: Int!
@@ -94,6 +100,11 @@ type Query{
   getNextVideo(videoid: Int!): [Video!]!
 
   getVideoLike(videoid: Int!, type: String!): [LikeVideo!]!
+  getCommentLike(videoid: Int!, type: String!): [LikeComment!]!
+  getReplyLike(videoid: Int!, type: String!): [LikeReply!]!
+
+  getSubscribe(userid: String!):[Subscribe!]!
+
 }
 
 input newUser {
@@ -151,5 +162,7 @@ type Mutation {
   deleteVideo (id: ID!): Boolean!
   createComment (input: newComment): Comment!
   deleteComment (userid: String!): Boolean!
+
+  createSubscribe(userid: String!, subscribeto: String!): Subscribe!
 }
 

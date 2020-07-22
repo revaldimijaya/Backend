@@ -77,23 +77,27 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CommentLike   func(childComplexity int, id int, userid string, typeArg string) int
-		CreateComment func(childComplexity int, input *model.NewComment) int
-		CreateUser    func(childComplexity int, input *model.NewUser) int
-		CreateVideo   func(childComplexity int, input *model.NewVideo) int
-		DeleteComment func(childComplexity int, userid string) int
-		DeleteUser    func(childComplexity int, id string) int
-		DeleteVideo   func(childComplexity int, id string) int
-		ReplyLike     func(childComplexity int, id int, userid string, typeArg string) int
-		UpdateUser    func(childComplexity int, id string, input *model.NewUser) int
-		UpdateVideo   func(childComplexity int, id string, input *model.NewVideo) int
-		VideoLike     func(childComplexity int, id int, userid string, typeArg string) int
-		Watch         func(childComplexity int, id int) int
+		CommentLike     func(childComplexity int, id int, userid string, typeArg string) int
+		CreateComment   func(childComplexity int, input *model.NewComment) int
+		CreateSubscribe func(childComplexity int, userid string, subscribeto string) int
+		CreateUser      func(childComplexity int, input *model.NewUser) int
+		CreateVideo     func(childComplexity int, input *model.NewVideo) int
+		DeleteComment   func(childComplexity int, userid string) int
+		DeleteUser      func(childComplexity int, id string) int
+		DeleteVideo     func(childComplexity int, id string) int
+		ReplyLike       func(childComplexity int, id int, userid string, typeArg string) int
+		UpdateUser      func(childComplexity int, id string, input *model.NewUser) int
+		UpdateVideo     func(childComplexity int, id string, input *model.NewVideo) int
+		VideoLike       func(childComplexity int, id int, userid string, typeArg string) int
+		Watch           func(childComplexity int, id int) int
 	}
 
 	Query struct {
 		Comment        func(childComplexity int, videoid int) int
+		GetCommentLike func(childComplexity int, videoid int, typeArg string) int
 		GetNextVideo   func(childComplexity int, videoid int) int
+		GetReplyLike   func(childComplexity int, videoid int, typeArg string) int
+		GetSubscribe   func(childComplexity int, userid string) int
 		GetUserID      func(childComplexity int, userid string) int
 		GetVideoByUser func(childComplexity int, userid string) int
 		GetVideoID     func(childComplexity int, videoid int) int
@@ -113,6 +117,12 @@ type ComplexityRoot struct {
 		UserID    func(childComplexity int) int
 		VideoID   func(childComplexity int) int
 		Year      func(childComplexity int) int
+	}
+
+	Subscribe struct {
+		ID          func(childComplexity int) int
+		SubscribeTo func(childComplexity int) int
+		UserID      func(childComplexity int) int
 	}
 
 	User struct {
@@ -169,6 +179,7 @@ type MutationResolver interface {
 	DeleteVideo(ctx context.Context, id string) (bool, error)
 	CreateComment(ctx context.Context, input *model.NewComment) (*model.Comment, error)
 	DeleteComment(ctx context.Context, userid string) (bool, error)
+	CreateSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
@@ -179,6 +190,9 @@ type QueryResolver interface {
 	GetVideoID(ctx context.Context, videoid int) (*model.Video, error)
 	GetNextVideo(ctx context.Context, videoid int) ([]*model.Video, error)
 	GetVideoLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeVideo, error)
+	GetCommentLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeComment, error)
+	GetReplyLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeReply, error)
+	GetSubscribe(ctx context.Context, userid string) ([]*model.Subscribe, error)
 }
 
 type executableSchema struct {
@@ -367,6 +381,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateComment(childComplexity, args["input"].(*model.NewComment)), true
 
+	case "Mutation.createSubscribe":
+		if e.complexity.Mutation.CreateSubscribe == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createSubscribe_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateSubscribe(childComplexity, args["userid"].(string), args["subscribeto"].(string)), true
+
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
 			break
@@ -499,6 +525,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Comment(childComplexity, args["videoid"].(int)), true
 
+	case "Query.getCommentLike":
+		if e.complexity.Query.GetCommentLike == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getCommentLike_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetCommentLike(childComplexity, args["videoid"].(int), args["type"].(string)), true
+
 	case "Query.getNextVideo":
 		if e.complexity.Query.GetNextVideo == nil {
 			break
@@ -510,6 +548,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetNextVideo(childComplexity, args["videoid"].(int)), true
+
+	case "Query.getReplyLike":
+		if e.complexity.Query.GetReplyLike == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getReplyLike_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetReplyLike(childComplexity, args["videoid"].(int), args["type"].(string)), true
+
+	case "Query.getSubscribe":
+		if e.complexity.Query.GetSubscribe == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSubscribe_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSubscribe(childComplexity, args["userid"].(string)), true
 
 	case "Query.getUserId":
 		if e.complexity.Query.GetUserID == nil {
@@ -642,6 +704,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Reply.Year(childComplexity), true
+
+	case "Subscribe.id":
+		if e.complexity.Subscribe.ID == nil {
+			break
+		}
+
+		return e.complexity.Subscribe.ID(childComplexity), true
+
+	case "Subscribe.subscribe_to":
+		if e.complexity.Subscribe.SubscribeTo == nil {
+			break
+		}
+
+		return e.complexity.Subscribe.SubscribeTo(childComplexity), true
+
+	case "Subscribe.user_id":
+		if e.complexity.Subscribe.UserID == nil {
+			break
+		}
+
+		return e.complexity.Subscribe.UserID(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -998,6 +1081,12 @@ type LikeReply {
   type: String!
 }
 
+type Subscribe {
+  id: ID!
+  user_id: String!
+  subscribe_to: String!
+}
+
 type newReply {
   user_id: String!
   video_id: Int!
@@ -1020,6 +1109,11 @@ type Query{
   getNextVideo(videoid: Int!): [Video!]!
 
   getVideoLike(videoid: Int!, type: String!): [LikeVideo!]!
+  getCommentLike(videoid: Int!, type: String!): [LikeComment!]!
+  getReplyLike(videoid: Int!, type: String!): [LikeReply!]!
+
+  getSubscribe(userid: String!):[Subscribe!]!
+
 }
 
 input newUser {
@@ -1077,6 +1171,8 @@ type Mutation {
   deleteVideo (id: ID!): Boolean!
   createComment (input: newComment): Comment!
   deleteComment (userid: String!): Boolean!
+
+  createSubscribe(userid: String!, subscribeto: String!): Subscribe!
 }
 
 `, BuiltIn: false},
@@ -1128,6 +1224,28 @@ func (ec *executionContext) field_Mutation_createComment_args(ctx context.Contex
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createSubscribe_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["subscribeto"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["subscribeto"] = arg1
 	return args, nil
 }
 
@@ -1347,6 +1465,28 @@ func (ec *executionContext) field_Query_comment_args(ctx context.Context, rawArg
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_getCommentLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["videoid"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["videoid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["type"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_getNextVideo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1358,6 +1498,42 @@ func (ec *executionContext) field_Query_getNextVideo_args(ctx context.Context, r
 		}
 	}
 	args["videoid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getReplyLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["videoid"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["videoid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["type"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getSubscribe_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userid"] = arg0
 	return args, nil
 }
 
@@ -2667,6 +2843,47 @@ func (ec *executionContext) _Mutation_deleteComment(ctx context.Context, field g
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createSubscribe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createSubscribe_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateSubscribe(rctx, args["userid"].(string), args["subscribeto"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Subscribe)
+	fc.Result = res
+	return ec.marshalNSubscribe2ᚖGo_BackendᚋgraphᚋmodelᚐSubscribe(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2979,6 +3196,129 @@ func (ec *executionContext) _Query_getVideoLike(ctx context.Context, field graph
 	res := resTmp.([]*model.LikeVideo)
 	fc.Result = res
 	return ec.marshalNLikeVideo2ᚕᚖGo_BackendᚋgraphᚋmodelᚐLikeVideoᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getCommentLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getCommentLike_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetCommentLike(rctx, args["videoid"].(int), args["type"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.LikeComment)
+	fc.Result = res
+	return ec.marshalNLikeComment2ᚕᚖGo_BackendᚋgraphᚋmodelᚐLikeCommentᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getReplyLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getReplyLike_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetReplyLike(rctx, args["videoid"].(int), args["type"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.LikeReply)
+	fc.Result = res
+	return ec.marshalNLikeReply2ᚕᚖGo_BackendᚋgraphᚋmodelᚐLikeReplyᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getSubscribe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getSubscribe_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSubscribe(rctx, args["userid"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Subscribe)
+	fc.Result = res
+	return ec.marshalNSubscribe2ᚕᚖGo_BackendᚋgraphᚋmodelᚐSubscribeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3388,6 +3728,108 @@ func (ec *executionContext) _Reply_year(ctx context.Context, field graphql.Colle
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Subscribe_id(ctx context.Context, field graphql.CollectedField, obj *model.Subscribe) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscribe",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Subscribe_user_id(ctx context.Context, field graphql.CollectedField, obj *model.Subscribe) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscribe",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Subscribe_subscribe_to(ctx context.Context, field graphql.CollectedField, obj *model.Subscribe) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscribe",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SubscribeTo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
@@ -5985,6 +6427,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createSubscribe":
+			out.Values[i] = ec._Mutation_createSubscribe(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6123,6 +6570,48 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "getCommentLike":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getCommentLike(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getReplyLike":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getReplyLike(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getSubscribe":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSubscribe(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -6196,6 +6685,43 @@ func (ec *executionContext) _Reply(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "year":
 			out.Values[i] = ec._Reply_year(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var subscribeImplementors = []string{"Subscribe"}
+
+func (ec *executionContext) _Subscribe(ctx context.Context, sel ast.SelectionSet, obj *model.Subscribe) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscribeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Subscribe")
+		case "id":
+			out.Values[i] = ec._Subscribe_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._Subscribe_user_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "subscribe_to":
+			out.Values[i] = ec._Subscribe_subscribe_to(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -6769,6 +7295,108 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) marshalNLikeComment2Go_BackendᚋgraphᚋmodelᚐLikeComment(ctx context.Context, sel ast.SelectionSet, v model.LikeComment) graphql.Marshaler {
+	return ec._LikeComment(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLikeComment2ᚕᚖGo_BackendᚋgraphᚋmodelᚐLikeCommentᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.LikeComment) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLikeComment2ᚖGo_BackendᚋgraphᚋmodelᚐLikeComment(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNLikeComment2ᚖGo_BackendᚋgraphᚋmodelᚐLikeComment(ctx context.Context, sel ast.SelectionSet, v *model.LikeComment) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._LikeComment(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNLikeReply2Go_BackendᚋgraphᚋmodelᚐLikeReply(ctx context.Context, sel ast.SelectionSet, v model.LikeReply) graphql.Marshaler {
+	return ec._LikeReply(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLikeReply2ᚕᚖGo_BackendᚋgraphᚋmodelᚐLikeReplyᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.LikeReply) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLikeReply2ᚖGo_BackendᚋgraphᚋmodelᚐLikeReply(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNLikeReply2ᚖGo_BackendᚋgraphᚋmodelᚐLikeReply(ctx context.Context, sel ast.SelectionSet, v *model.LikeReply) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._LikeReply(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNLikeVideo2Go_BackendᚋgraphᚋmodelᚐLikeVideo(ctx context.Context, sel ast.SelectionSet, v model.LikeVideo) graphql.Marshaler {
 	return ec._LikeVideo(ctx, sel, &v)
 }
@@ -6832,6 +7460,57 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNSubscribe2Go_BackendᚋgraphᚋmodelᚐSubscribe(ctx context.Context, sel ast.SelectionSet, v model.Subscribe) graphql.Marshaler {
+	return ec._Subscribe(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSubscribe2ᚕᚖGo_BackendᚋgraphᚋmodelᚐSubscribeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Subscribe) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNSubscribe2ᚖGo_BackendᚋgraphᚋmodelᚐSubscribe(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNSubscribe2ᚖGo_BackendᚋgraphᚋmodelᚐSubscribe(ctx context.Context, sel ast.SelectionSet, v *model.Subscribe) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Subscribe(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNUser2Go_BackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
