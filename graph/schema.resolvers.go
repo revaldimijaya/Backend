@@ -327,7 +327,11 @@ func (r *queryResolver) GetNextVideo(ctx context.Context, videoid int) ([]*model
 func (r *queryResolver) GetVideoLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeVideo, error) {
 	var like []*model.LikeVideo
 
-	r.DB.Model(&like).Where("video_id = ? && type = ?", videoid, typeArg).Select()
+	err := r.DB.Model(&like).Where("video_id = ? && type = ?", videoid, typeArg).Select()
+
+	if err != nil {
+		return like, errors.New("video like / dislike not found!")
+	}
 
 	return like, nil
 }
