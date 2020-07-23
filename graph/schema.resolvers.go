@@ -189,11 +189,101 @@ func (r *mutationResolver) VideoLike(ctx context.Context, id int, userid string,
 }
 
 func (r *mutationResolver) CommentLike(ctx context.Context, id int, userid string, typeArg string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	var comment model.Comment
+
+	err := r.DB.Model(&comment).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("video not found!")
+	}
+
+	var like model.LikeComment
+
+	err_like := r.DB.Model(&like).Where("comment_id = ? AND user_id = ?", id, userid).First()
+
+	if err_like != nil {
+
+		insert := model.LikeComment{
+			UserID:    userid,
+			CommentID: id,
+			Type:      typeArg,
+		}
+		_, err_insert := r.DB.Model(&insert).Insert()
+
+		if err_insert != nil {
+			return false, errors.New("insert video like failed")
+		}
+
+		return true, nil
+	}
+
+	diff_like := r.DB.Model(&like).Where("comment_id = ? AND user_id = ? AND type = ?", id, userid, "like").First()
+
+	if diff_like == nil && typeArg == "like" {
+		r.DB.Model(&like).Where("comment_id = ? AND user_id = ?", id, userid).Delete()
+
+	} else if diff_like == nil && typeArg == "dislike" {
+		like.Type = "dislike"
+		r.DB.Model(&like).Where("comment_id = ? AND user_id = ?", id, userid).Update()
+
+	} else if diff_like != nil && typeArg == "dislike" {
+		r.DB.Model(&like).Where("comment_id = ? AND user_id = ?", id, userid).Delete()
+
+	} else if diff_like != nil && typeArg == "like" {
+		like.Type = "like"
+		r.DB.Model(&like).Where("comment_id = ? AND user_id = ?", id, userid).Update()
+	}
+
+	return true, nil
 }
 
 func (r *mutationResolver) ReplyLike(ctx context.Context, id int, userid string, typeArg string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	var reply model.Reply
+
+	err := r.DB.Model(&reply).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("video not found!")
+	}
+
+	var like model.LikeReply
+
+	err_like := r.DB.Model(&like).Where("reply_id = ? AND user_id = ?", id, userid).First()
+
+	if err_like != nil {
+
+		insert := model.LikeReply{
+			UserID:  userid,
+			ReplyID: id,
+			Type:    typeArg,
+		}
+		_, err_insert := r.DB.Model(&insert).Insert()
+
+		if err_insert != nil {
+			return false, errors.New("insert video like failed")
+		}
+
+		return true, nil
+	}
+
+	diff_like := r.DB.Model(&like).Where("reply_id = ? AND user_id = ? AND type = ?", id, userid, "like").First()
+
+	if diff_like == nil && typeArg == "like" {
+		r.DB.Model(&like).Where("reply_id = ? AND user_id = ?", id, userid).Delete()
+
+	} else if diff_like == nil && typeArg == "dislike" {
+		like.Type = "dislike"
+		r.DB.Model(&like).Where("reply_id = ? AND user_id = ?", id, userid).Update()
+
+	} else if diff_like != nil && typeArg == "dislike" {
+		r.DB.Model(&like).Where("reply_id = ? AND user_id = ?", id, userid).Delete()
+
+	} else if diff_like != nil && typeArg == "like" {
+		like.Type = "like"
+		r.DB.Model(&like).Where("reply_id = ? AND user_id = ?", id, userid).Update()
+	}
+
+	return true, nil
 }
 
 func (r *mutationResolver) DeleteVideo(ctx context.Context, id string) (bool, error) {
@@ -245,7 +335,7 @@ func (r *mutationResolver) CreateSubscribe(ctx context.Context, userid string, s
 		SubscribeTo: subscribeto,
 	}
 
-	_,err := r.DB.Model(&subs).Insert()
+	_, err := r.DB.Model(&subs).Insert()
 
 	if err != nil {
 		return nil, errors.New("Insert new subscribe failed")
@@ -347,18 +437,26 @@ func (r *queryResolver) GetVideoLike(ctx context.Context, videoid int, typeArg s
 	return like, nil
 }
 
-func (r *queryResolver) GetCommentLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeComment, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) GetCommentLike(ctx context.Context, commentid int, typeArg string) ([]*model.LikeComment, error) {
+	var like []*model.LikeComment
+
+	r.DB.Model(&like).Where("comment_id = ? AND type = ?", commentid, typeArg).Select()
+
+	return like, nil
 }
 
-func (r *queryResolver) GetReplyLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeReply, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) GetReplyLike(ctx context.Context, replyid int, typeArg string) ([]*model.LikeReply, error) {
+	var like []*model.LikeReply
+
+	r.DB.Model(&like).Where("reply_id = ? AND type = ?", replyid, typeArg).Select()
+
+	return like, nil
 }
 
 func (r *queryResolver) GetSubscribe(ctx context.Context, userid string) ([]*model.Subscribe, error) {
 	var subs []*model.Subscribe
 
-	r.DB.Model(&subs).Where("user_id = ?",userid).Select()
+	r.DB.Model(&subs).Where("user_id = ?", userid).Select()
 
 	return subs, nil
 }

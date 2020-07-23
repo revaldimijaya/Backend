@@ -94,9 +94,9 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Comment        func(childComplexity int, videoid int) int
-		GetCommentLike func(childComplexity int, videoid int, typeArg string) int
+		GetCommentLike func(childComplexity int, commentid int, typeArg string) int
 		GetNextVideo   func(childComplexity int, videoid int) int
-		GetReplyLike   func(childComplexity int, videoid int, typeArg string) int
+		GetReplyLike   func(childComplexity int, replyid int, typeArg string) int
 		GetSubscribe   func(childComplexity int, userid string) int
 		GetUserID      func(childComplexity int, userid string) int
 		GetVideoByUser func(childComplexity int, userid string) int
@@ -109,13 +109,10 @@ type ComplexityRoot struct {
 	Reply struct {
 		CommentID func(childComplexity int) int
 		Day       func(childComplexity int) int
-		Dislike   func(childComplexity int) int
 		ID        func(childComplexity int) int
-		Like      func(childComplexity int) int
 		Month     func(childComplexity int) int
 		Reply     func(childComplexity int) int
 		UserID    func(childComplexity int) int
-		VideoID   func(childComplexity int) int
 		Year      func(childComplexity int) int
 	}
 
@@ -190,8 +187,8 @@ type QueryResolver interface {
 	GetVideoID(ctx context.Context, videoid int) (*model.Video, error)
 	GetNextVideo(ctx context.Context, videoid int) ([]*model.Video, error)
 	GetVideoLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeVideo, error)
-	GetCommentLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeComment, error)
-	GetReplyLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeReply, error)
+	GetCommentLike(ctx context.Context, commentid int, typeArg string) ([]*model.LikeComment, error)
+	GetReplyLike(ctx context.Context, replyid int, typeArg string) ([]*model.LikeReply, error)
 	GetSubscribe(ctx context.Context, userid string) ([]*model.Subscribe, error)
 }
 
@@ -535,7 +532,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetCommentLike(childComplexity, args["videoid"].(int), args["type"].(string)), true
+		return e.complexity.Query.GetCommentLike(childComplexity, args["commentid"].(int), args["type"].(string)), true
 
 	case "Query.getNextVideo":
 		if e.complexity.Query.GetNextVideo == nil {
@@ -559,7 +556,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetReplyLike(childComplexity, args["videoid"].(int), args["type"].(string)), true
+		return e.complexity.Query.GetReplyLike(childComplexity, args["replyid"].(int), args["type"].(string)), true
 
 	case "Query.getSubscribe":
 		if e.complexity.Query.GetSubscribe == nil {
@@ -649,26 +646,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Reply.Day(childComplexity), true
 
-	case "Reply.dislike":
-		if e.complexity.Reply.Dislike == nil {
-			break
-		}
-
-		return e.complexity.Reply.Dislike(childComplexity), true
-
 	case "Reply.id":
 		if e.complexity.Reply.ID == nil {
 			break
 		}
 
 		return e.complexity.Reply.ID(childComplexity), true
-
-	case "Reply.like":
-		if e.complexity.Reply.Like == nil {
-			break
-		}
-
-		return e.complexity.Reply.Like(childComplexity), true
 
 	case "Reply.month":
 		if e.complexity.Reply.Month == nil {
@@ -690,13 +673,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Reply.UserID(childComplexity), true
-
-	case "Reply.video_id":
-		if e.complexity.Reply.VideoID == nil {
-			break
-		}
-
-		return e.complexity.Reply.VideoID(childComplexity), true
 
 	case "Reply.year":
 		if e.complexity.Reply.Year == nil {
@@ -1050,11 +1026,8 @@ type Comment {
 type Reply {
   id: ID!
   user_id: String!
-  video_id: Int!
   Comment_Id: Int!
   reply: String!
-  like: Int!
-  dislike: Int!
   day: Int!
   month: Int!
   year: Int!
@@ -1109,8 +1082,8 @@ type Query{
   getNextVideo(videoid: Int!): [Video!]!
 
   getVideoLike(videoid: Int!, type: String!): [LikeVideo!]!
-  getCommentLike(videoid: Int!, type: String!): [LikeComment!]!
-  getReplyLike(videoid: Int!, type: String!): [LikeReply!]!
+  getCommentLike(commentid: Int!, type: String!): [LikeComment!]!
+  getReplyLike(replyid: Int!, type: String!): [LikeReply!]!
 
   getSubscribe(userid: String!):[Subscribe!]!
 
@@ -1469,13 +1442,13 @@ func (ec *executionContext) field_Query_getCommentLike_args(ctx context.Context,
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := rawArgs["videoid"]; ok {
+	if tmp, ok := rawArgs["commentid"]; ok {
 		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["videoid"] = arg0
+	args["commentid"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["type"]; ok {
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
@@ -1505,13 +1478,13 @@ func (ec *executionContext) field_Query_getReplyLike_args(ctx context.Context, r
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := rawArgs["videoid"]; ok {
+	if tmp, ok := rawArgs["replyid"]; ok {
 		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["videoid"] = arg0
+	args["replyid"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["type"]; ok {
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
@@ -3222,7 +3195,7 @@ func (ec *executionContext) _Query_getCommentLike(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetCommentLike(rctx, args["videoid"].(int), args["type"].(string))
+		return ec.resolvers.Query().GetCommentLike(rctx, args["commentid"].(int), args["type"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3263,7 +3236,7 @@ func (ec *executionContext) _Query_getReplyLike(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetReplyLike(rctx, args["videoid"].(int), args["type"].(string))
+		return ec.resolvers.Query().GetReplyLike(rctx, args["replyid"].(int), args["type"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3458,40 +3431,6 @@ func (ec *executionContext) _Reply_user_id(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Reply_video_id(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Reply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.VideoID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Reply_Comment_Id(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3558,74 +3497,6 @@ func (ec *executionContext) _Reply_reply(ctx context.Context, field graphql.Coll
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Reply_like(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Reply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Like, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Reply_dislike(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Reply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Dislike, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Reply_day(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
@@ -6648,11 +6519,6 @@ func (ec *executionContext) _Reply(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "video_id":
-			out.Values[i] = ec._Reply_video_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "Comment_Id":
 			out.Values[i] = ec._Reply_Comment_Id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6660,16 +6526,6 @@ func (ec *executionContext) _Reply(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "reply":
 			out.Values[i] = ec._Reply_reply(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "like":
-			out.Values[i] = ec._Reply_like(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "dislike":
-			out.Values[i] = ec._Reply_dislike(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

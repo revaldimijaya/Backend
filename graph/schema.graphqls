@@ -41,11 +41,8 @@ type Comment {
 type Reply {
   id: ID!
   user_id: String!
-  video_id: Int!
   Comment_Id: Int!
   reply: String!
-  like: Int!
-  dislike: Int!
   day: Int!
   month: Int!
   year: Int!
@@ -100,8 +97,8 @@ type Query{
   getNextVideo(videoid: Int!): [Video!]!
 
   getVideoLike(videoid: Int!, type: String!): [LikeVideo!]!
-  getCommentLike(videoid: Int!, type: String!): [LikeComment!]!
-  getReplyLike(videoid: Int!, type: String!): [LikeReply!]!
+  getCommentLike(commentid: Int!, type: String!): [LikeComment!]!
+  getReplyLike(replyid: Int!, type: String!): [LikeReply!]!
 
   getSubscribe(userid: String!):[Subscribe!]!
 
