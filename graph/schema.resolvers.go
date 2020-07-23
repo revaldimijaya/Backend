@@ -332,7 +332,7 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, userid string) (bo
 func (r *mutationResolver) CreateSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error) {
 	var subscribe model.Subscribe
 
-	err := r.DB.Model(&subscribe).Where("userid = ? AND subscribeto = ?", userid, subscribeto).First()
+	err := r.DB.Model(&subscribe).Where("user_id = ? AND subscribe_to = ?", userid, subscribeto).First()
 
 	if err != nil {
 		subs := model.Subscribe{
@@ -349,7 +349,7 @@ func (r *mutationResolver) CreateSubscribe(ctx context.Context, userid string, s
 		return &subs, nil
 	}
 
-	r.DB.Model(&subscribe).Where("userid = ? AND subscribeto = ?", userid, subscribeto).Delete()
+	r.DB.Model(&subscribe).Where("user_id = ? AND subscribe_to = ?", userid, subscribeto).Delete()
 
 	return nil, err
 }
