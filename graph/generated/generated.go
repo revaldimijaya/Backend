@@ -98,7 +98,7 @@ type ComplexityRoot struct {
 		GetCommentLike func(childComplexity int, commentid int, typeArg string) int
 		GetNextVideo   func(childComplexity int, videoid int) int
 		GetReplyLike   func(childComplexity int, replyid int, typeArg string) int
-		GetSubscribe   func(childComplexity int, userid string) int
+		GetSubscribe   func(childComplexity int) int
 		GetUserID      func(childComplexity int, userid string) int
 		GetVideoByUser func(childComplexity int, userid string) int
 		GetVideoID     func(childComplexity int, videoid int) int
@@ -190,7 +190,7 @@ type QueryResolver interface {
 	GetVideoLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeVideo, error)
 	GetCommentLike(ctx context.Context, commentid int, typeArg string) ([]*model.LikeComment, error)
 	GetReplyLike(ctx context.Context, replyid int, typeArg string) ([]*model.LikeReply, error)
-	GetSubscribe(ctx context.Context, userid string) ([]*model.Subscribe, error)
+	GetSubscribe(ctx context.Context) ([]*model.Subscribe, error)
 	CheckSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error)
 }
 
@@ -577,12 +577,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_getSubscribe_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetSubscribe(childComplexity, args["userid"].(string)), true
+		return e.complexity.Query.GetSubscribe(childComplexity), true
 
 	case "Query.getUserId":
 		if e.complexity.Query.GetUserID == nil {
@@ -1099,7 +1094,7 @@ type Query{
   getCommentLike(commentid: Int!, type: String!): [LikeComment!]!
   getReplyLike(replyid: Int!, type: String!): [LikeReply!]!
 
-  getSubscribe(userid: String!):[Subscribe!]!
+  getSubscribe :[Subscribe!]!
   checkSubscribe(userid: String!, subscribeto: String!): Subscribe!
 
 }
@@ -1530,20 +1525,6 @@ func (ec *executionContext) field_Query_getReplyLike_args(ctx context.Context, r
 		}
 	}
 	args["type"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_getSubscribe_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["userid"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["userid"] = arg0
 	return args, nil
 }
 
@@ -3305,16 +3286,9 @@ func (ec *executionContext) _Query_getSubscribe(ctx context.Context, field graph
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getSubscribe_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetSubscribe(rctx, args["userid"].(string))
+		return ec.resolvers.Query().GetSubscribe(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)

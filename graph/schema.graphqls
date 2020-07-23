@@ -100,7 +100,7 @@ type Query{
   getCommentLike(commentid: Int!, type: String!): [LikeComment!]!
   getReplyLike(replyid: Int!, type: String!): [LikeReply!]!
 
-  getSubscribe(userid: String!):[Subscribe!]!
+  getSubscribe :[Subscribe!]!
   checkSubscribe(userid: String!, subscribeto: String!): Subscribe!
 
 }

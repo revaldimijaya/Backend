@@ -463,10 +463,10 @@ func (r *queryResolver) GetReplyLike(ctx context.Context, replyid int, typeArg s
 	return like, nil
 }
 
-func (r *queryResolver) GetSubscribe(ctx context.Context, userid string) ([]*model.Subscribe, error) {
+func (r *queryResolver) GetSubscribe(ctx context.Context) ([]*model.Subscribe, error) {
 	var subs []*model.Subscribe
 
-	r.DB.Model(&subs).Where("user_id = ?", userid).Select()
+	r.DB.Model(&subs).Select()
 
 	return subs, nil
 }
