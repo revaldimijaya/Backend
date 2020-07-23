@@ -79,6 +79,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CommentLike     func(childComplexity int, id int, userid string, typeArg string) int
 		CreateComment   func(childComplexity int, input *model.NewComment) int
+		CreateReply     func(childComplexity int, input *model.NewReply) int
 		CreateSubscribe func(childComplexity int, userid string, subscribeto string) int
 		CreateUser      func(childComplexity int, input *model.NewUser) int
 		CreateVideo     func(childComplexity int, input *model.NewVideo) int
@@ -103,6 +104,7 @@ type ComplexityRoot struct {
 		GetVideoByUser func(childComplexity int, userid string) int
 		GetVideoID     func(childComplexity int, videoid int) int
 		GetVideoLike   func(childComplexity int, videoid int, typeArg string) int
+		Reply          func(childComplexity int, commentid int) int
 		Users          func(childComplexity int) int
 		Videos         func(childComplexity int) int
 	}
@@ -150,18 +152,6 @@ type ComplexityRoot struct {
 		Watch       func(childComplexity int) int
 		Year        func(childComplexity int) int
 	}
-
-	NewReply struct {
-		CommentID func(childComplexity int) int
-		Day       func(childComplexity int) int
-		Dislike   func(childComplexity int) int
-		Like      func(childComplexity int) int
-		Month     func(childComplexity int) int
-		Reply     func(childComplexity int) int
-		UserID    func(childComplexity int) int
-		VideoID   func(childComplexity int) int
-		Year      func(childComplexity int) int
-	}
 }
 
 type MutationResolver interface {
@@ -177,12 +167,14 @@ type MutationResolver interface {
 	DeleteVideo(ctx context.Context, id string) (bool, error)
 	CreateComment(ctx context.Context, input *model.NewComment) (*model.Comment, error)
 	DeleteComment(ctx context.Context, userid string) (bool, error)
+	CreateReply(ctx context.Context, input *model.NewReply) (*model.Reply, error)
 	CreateSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
 	Videos(ctx context.Context) ([]*model.Video, error)
 	Comment(ctx context.Context, videoid int) ([]*model.Comment, error)
+	Reply(ctx context.Context, commentid int) ([]*model.Reply, error)
 	GetUserID(ctx context.Context, userid string) (*model.User, error)
 	GetVideoByUser(ctx context.Context, userid string) ([]*model.Video, error)
 	GetVideoID(ctx context.Context, videoid int) (*model.Video, error)
@@ -379,6 +371,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateComment(childComplexity, args["input"].(*model.NewComment)), true
+
+	case "Mutation.createReply":
+		if e.complexity.Mutation.CreateReply == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createReply_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateReply(childComplexity, args["input"].(*model.NewReply)), true
 
 	case "Mutation.createSubscribe":
 		if e.complexity.Mutation.CreateSubscribe == nil {
@@ -627,6 +631,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetVideoLike(childComplexity, args["videoid"].(int), args["type"].(string)), true
 
+	case "Query.reply":
+		if e.complexity.Query.Reply == nil {
+			break
+		}
+
+		args, err := ec.field_Query_reply_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Reply(childComplexity, args["commentid"].(int)), true
+
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
 			break
@@ -865,69 +881,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Video.Year(childComplexity), true
 
-	case "newReply.Comment_Id":
-		if e.complexity.NewReply.CommentID == nil {
-			break
-		}
-
-		return e.complexity.NewReply.CommentID(childComplexity), true
-
-	case "newReply.day":
-		if e.complexity.NewReply.Day == nil {
-			break
-		}
-
-		return e.complexity.NewReply.Day(childComplexity), true
-
-	case "newReply.dislike":
-		if e.complexity.NewReply.Dislike == nil {
-			break
-		}
-
-		return e.complexity.NewReply.Dislike(childComplexity), true
-
-	case "newReply.like":
-		if e.complexity.NewReply.Like == nil {
-			break
-		}
-
-		return e.complexity.NewReply.Like(childComplexity), true
-
-	case "newReply.month":
-		if e.complexity.NewReply.Month == nil {
-			break
-		}
-
-		return e.complexity.NewReply.Month(childComplexity), true
-
-	case "newReply.reply":
-		if e.complexity.NewReply.Reply == nil {
-			break
-		}
-
-		return e.complexity.NewReply.Reply(childComplexity), true
-
-	case "newReply.user_id":
-		if e.complexity.NewReply.UserID == nil {
-			break
-		}
-
-		return e.complexity.NewReply.UserID(childComplexity), true
-
-	case "newReply.video_id":
-		if e.complexity.NewReply.VideoID == nil {
-			break
-		}
-
-		return e.complexity.NewReply.VideoID(childComplexity), true
-
-	case "newReply.year":
-		if e.complexity.NewReply.Year == nil {
-			break
-		}
-
-		return e.complexity.NewReply.Year(childComplexity), true
-
 	}
 	return 0, false
 }
@@ -1069,13 +1022,10 @@ type Subscribe {
   subscribe_to: String!
 }
 
-type newReply {
+input newReply {
   user_id: String!
-  video_id: Int!
   Comment_Id: Int!
   reply: String!
-  like: Int!
-  dislike: Int!
   day: Int!
   month: Int!
   year: Int!
@@ -1085,6 +1035,8 @@ type Query{
   users: [User!]!
   videos: [Video!]!
   comment(videoid: Int!): [Comment!]!
+  reply(commentid: Int!): [Reply!]!
+
   getUserId(userid: String!): User!
   getVideoByUser(userid: String!): [Video!]!
   getVideoId(videoid: Int!): Video!
@@ -1155,6 +1107,8 @@ type Mutation {
   createComment (input: newComment): Comment!
   deleteComment (userid: String!): Boolean!
 
+  createReply (input: newReply): Reply!
+
   createSubscribe(userid: String!, subscribeto: String!): Subscribe!
 }
 
@@ -1202,6 +1156,20 @@ func (ec *executionContext) field_Mutation_createComment_args(ctx context.Contex
 	var arg0 *model.NewComment
 	if tmp, ok := rawArgs["input"]; ok {
 		arg0, err = ec.unmarshalOnewComment2ᚖGo_BackendᚋgraphᚋmodelᚐNewComment(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createReply_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.NewReply
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOnewReply2ᚖGo_BackendᚋgraphᚋmodelᚐNewReply(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1589,6 +1557,20 @@ func (ec *executionContext) field_Query_getVideoLike_args(ctx context.Context, r
 		}
 	}
 	args["type"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_reply_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["commentid"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["commentid"] = arg0
 	return args, nil
 }
 
@@ -2834,6 +2816,47 @@ func (ec *executionContext) _Mutation_deleteComment(ctx context.Context, field g
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createReply(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createReply_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateReply(rctx, args["input"].(*model.NewReply))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Reply)
+	fc.Result = res
+	return ec.marshalNReply2ᚖGo_BackendᚋgraphᚋmodelᚐReply(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createSubscribe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2982,6 +3005,47 @@ func (ec *executionContext) _Query_comment(ctx context.Context, field graphql.Co
 	res := resTmp.([]*model.Comment)
 	fc.Result = res
 	return ec.marshalNComment2ᚕᚖGo_BackendᚋgraphᚋmodelᚐCommentᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_reply(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_reply_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Reply(rctx, args["commentid"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Reply)
+	fc.Result = res
+	return ec.marshalNReply2ᚕᚖGo_BackendᚋgraphᚋmodelᚐReplyᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getUserId(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5554,312 +5618,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _newReply_user_id(ctx context.Context, field graphql.CollectedField, obj *model.NewReply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "newReply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UserID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _newReply_video_id(ctx context.Context, field graphql.CollectedField, obj *model.NewReply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "newReply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.VideoID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _newReply_Comment_Id(ctx context.Context, field graphql.CollectedField, obj *model.NewReply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "newReply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CommentID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _newReply_reply(ctx context.Context, field graphql.CollectedField, obj *model.NewReply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "newReply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Reply, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _newReply_like(ctx context.Context, field graphql.CollectedField, obj *model.NewReply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "newReply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Like, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _newReply_dislike(ctx context.Context, field graphql.CollectedField, obj *model.NewReply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "newReply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Dislike, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _newReply_day(ctx context.Context, field graphql.CollectedField, obj *model.NewReply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "newReply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Day, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _newReply_month(ctx context.Context, field graphql.CollectedField, obj *model.NewReply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "newReply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Month, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _newReply_year(ctx context.Context, field graphql.CollectedField, obj *model.NewReply) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "newReply",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Year, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -5897,6 +5655,54 @@ func (ec *executionContext) unmarshalInputnewComment(ctx context.Context, obj in
 		case "dislike":
 			var err error
 			it.Dislike, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "day":
+			var err error
+			it.Day, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "month":
+			var err error
+			it.Month, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "year":
+			var err error
+			it.Year, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputnewReply(ctx context.Context, obj interface{}) (model.NewReply, error) {
+	var it model.NewReply
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "user_id":
+			var err error
+			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Comment_Id":
+			var err error
+			it.CommentID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "reply":
+			var err error
+			it.Reply, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6350,6 +6156,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createReply":
+			out.Values[i] = ec._Mutation_createReply(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createSubscribe":
 			out.Values[i] = ec._Mutation_createSubscribe(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -6418,6 +6229,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_comment(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "reply":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_reply(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -7053,73 +6878,6 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
-var newReplyImplementors = []string{"newReply"}
-
-func (ec *executionContext) _newReply(ctx context.Context, sel ast.SelectionSet, obj *model.NewReply) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, newReplyImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("newReply")
-		case "user_id":
-			out.Values[i] = ec._newReply_user_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "video_id":
-			out.Values[i] = ec._newReply_video_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "Comment_Id":
-			out.Values[i] = ec._newReply_Comment_Id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "reply":
-			out.Values[i] = ec._newReply_reply(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "like":
-			out.Values[i] = ec._newReply_like(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "dislike":
-			out.Values[i] = ec._newReply_dislike(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "day":
-			out.Values[i] = ec._newReply_day(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "month":
-			out.Values[i] = ec._newReply_month(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "year":
-			out.Values[i] = ec._newReply_year(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
@@ -7368,6 +7126,57 @@ func (ec *executionContext) marshalNLikeVideo2ᚖGo_BackendᚋgraphᚋmodelᚐLi
 		return graphql.Null
 	}
 	return ec._LikeVideo(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNReply2Go_BackendᚋgraphᚋmodelᚐReply(ctx context.Context, sel ast.SelectionSet, v model.Reply) graphql.Marshaler {
+	return ec._Reply(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNReply2ᚕᚖGo_BackendᚋgraphᚋmodelᚐReplyᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Reply) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNReply2ᚖGo_BackendᚋgraphᚋmodelᚐReply(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNReply2ᚖGo_BackendᚋgraphᚋmodelᚐReply(ctx context.Context, sel ast.SelectionSet, v *model.Reply) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Reply(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -8000,6 +7809,18 @@ func (ec *executionContext) unmarshalOnewComment2ᚖGo_Backendᚋgraphᚋmodel�
 		return nil, nil
 	}
 	res, err := ec.unmarshalOnewComment2Go_BackendᚋgraphᚋmodelᚐNewComment(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalOnewReply2Go_BackendᚋgraphᚋmodelᚐNewReply(ctx context.Context, v interface{}) (model.NewReply, error) {
+	return ec.unmarshalInputnewReply(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOnewReply2ᚖGo_BackendᚋgraphᚋmodelᚐNewReply(ctx context.Context, v interface{}) (*model.NewReply, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOnewReply2Go_BackendᚋgraphᚋmodelᚐNewReply(ctx, v)
 	return &res, err
 }
 

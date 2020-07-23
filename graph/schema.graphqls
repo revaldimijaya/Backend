@@ -75,13 +75,10 @@ type Subscribe {
   subscribe_to: String!
 }
 
-type newReply {
+input newReply {
   user_id: String!
-  video_id: Int!
   Comment_Id: Int!
   reply: String!
-  like: Int!
-  dislike: Int!
   day: Int!
   month: Int!
   year: Int!
@@ -91,6 +88,8 @@ type Query{
   users: [User!]!
   videos: [Video!]!
   comment(videoid: Int!): [Comment!]!
+  reply(commentid: Int!): [Reply!]!
+
   getUserId(userid: String!): User!
   getVideoByUser(userid: String!): [Video!]!
   getVideoId(videoid: Int!): Video!
@@ -160,6 +159,8 @@ type Mutation {
   deleteVideo (id: ID!): Boolean!
   createComment (input: newComment): Comment!
   deleteComment (userid: String!): Boolean!
+
+  createReply (input: newReply): Reply!
 
   createSubscribe(userid: String!, subscribeto: String!): Subscribe!
 }

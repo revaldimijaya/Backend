@@ -92,11 +92,8 @@ type NewComment struct {
 
 type NewReply struct {
 	UserID    string `json:"user_id"`
-	VideoID   int    `json:"video_id"`
 	CommentID int    `json:"Comment_Id"`
 	Reply     string `json:"reply"`
-	Like      int    `json:"like"`
-	Dislike   int    `json:"dislike"`
 	Day       int    `json:"day"`
 	Month     int    `json:"month"`
 	Year      int    `json:"year"`

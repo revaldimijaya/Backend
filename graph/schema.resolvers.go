@@ -329,6 +329,25 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, userid string) (bo
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *mutationResolver) CreateReply(ctx context.Context, input *model.NewReply) (*model.Reply, error) {
+	reply := model.Reply{
+		UserID: input.UserID,
+		CommentID:       input.CommentID,
+		Reply: input.Reply,
+		Day:      input.Day,
+		Month: input.Month,
+		Year: input.Year,
+	}
+
+	_, err := r.DB.Model(&reply).Insert()
+
+	if err != nil {
+		return nil, errors.New("Insert new reply failed")
+	}
+
+	return &reply, nil
+}
+
 func (r *mutationResolver) CreateSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error) {
 	var subscribe model.Subscribe
 
@@ -389,6 +408,18 @@ func (r *queryResolver) Comment(ctx context.Context, videoid int) ([]*model.Comm
 	}
 
 	return comment, nil
+}
+
+func (r *queryResolver) Reply(ctx context.Context, commentid int) ([]*model.Reply, error) {
+	var reply []*model.Reply
+
+	err := r.DB.Model(&reply).Where("comment_id = ?", commentid).Select()
+
+	if err != nil {
+		return nil, errors.New("reply not found!")
+	}
+
+	return reply, nil
 }
 
 func (r *queryResolver) GetUserID(ctx context.Context, userid string) (*model.User, error) {
