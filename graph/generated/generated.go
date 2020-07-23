@@ -657,7 +657,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Videos(childComplexity), true
 
-	case "Reply.Comment_Id":
+	case "Reply.comment_id":
 		if e.complexity.Reply.CommentID == nil {
 			break
 		}
@@ -988,7 +988,7 @@ type Comment {
 type Reply {
   id: ID!
   user_id: String!
-  Comment_Id: Int!
+  comment_id: Int!
   reply: String!
   day: Int!
   month: Int!
@@ -1024,7 +1024,7 @@ type Subscribe {
 
 input newReply {
   user_id: String!
-  Comment_Id: Int!
+  comment_id: Int!
   reply: String!
   day: Int!
   month: Int!
@@ -3547,7 +3547,7 @@ func (ec *executionContext) _Reply_user_id(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Reply_Comment_Id(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
+func (ec *executionContext) _Reply_comment_id(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5694,7 +5694,7 @@ func (ec *executionContext) unmarshalInputnewReply(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "Comment_Id":
+		case "comment_id":
 			var err error
 			it.CommentID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
@@ -6410,8 +6410,8 @@ func (ec *executionContext) _Reply(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "Comment_Id":
-			out.Values[i] = ec._Reply_Comment_Id(ctx, field, obj)
+		case "comment_id":
+			out.Values[i] = ec._Reply_comment_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

@@ -331,12 +331,12 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, userid string) (bo
 
 func (r *mutationResolver) CreateReply(ctx context.Context, input *model.NewReply) (*model.Reply, error) {
 	reply := model.Reply{
-		UserID: input.UserID,
-		CommentID:       input.CommentID,
-		Reply: input.Reply,
-		Day:      input.Day,
-		Month: input.Month,
-		Year: input.Year,
+		UserID:    input.UserID,
+		CommentID: input.CommentID,
+		Reply:     input.Reply,
+		Day:       input.Day,
+		Month:     input.Month,
+		Year:      input.Year,
 	}
 
 	_, err := r.DB.Model(&reply).Insert()

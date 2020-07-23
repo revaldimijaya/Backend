@@ -38,7 +38,7 @@ type LikeVideo struct {
 type Reply struct {
 	ID        string `json:"id"`
 	UserID    string `json:"user_id"`
-	CommentID int    `json:"Comment_Id"`
+	CommentID int    `json:"comment_id"`
 	Reply     string `json:"reply"`
 	Day       int    `json:"day"`
 	Month     int    `json:"month"`
@@ -92,7 +92,7 @@ type NewComment struct {
 
 type NewReply struct {
 	UserID    string `json:"user_id"`
-	CommentID int    `json:"Comment_Id"`
+	CommentID int    `json:"comment_id"`
 	Reply     string `json:"reply"`
 	Day       int    `json:"day"`
 	Month     int    `json:"month"`

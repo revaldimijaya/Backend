@@ -41,7 +41,7 @@ type Comment {
 type Reply {
   id: ID!
   user_id: String!
-  Comment_Id: Int!
+  comment_id: Int!
   reply: String!
   day: Int!
   month: Int!
@@ -77,7 +77,7 @@ type Subscribe {
 
 input newReply {
   user_id: String!
-  Comment_Id: Int!
+  comment_id: Int!
   reply: String!
   day: Int!
   month: Int!
