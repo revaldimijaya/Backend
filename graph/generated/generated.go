@@ -191,7 +191,7 @@ type QueryResolver interface {
 	GetCommentLike(ctx context.Context, commentid int, typeArg string) ([]*model.LikeComment, error)
 	GetReplyLike(ctx context.Context, replyid int, typeArg string) ([]*model.LikeReply, error)
 	GetSubscribe(ctx context.Context, userid string) ([]*model.Subscribe, error)
-	CheckSubscribe(ctx context.Context, userid string, subscribeto string) (bool, error)
+	CheckSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error)
 }
 
 type executableSchema struct {
@@ -1100,7 +1100,7 @@ type Query{
   getReplyLike(replyid: Int!, type: String!): [LikeReply!]!
 
   getSubscribe(userid: String!):[Subscribe!]!
-  checkSubscribe(userid: String!, subscribeto: String!): Boolean!
+  checkSubscribe(userid: String!, subscribeto: String!): Subscribe!
 
 }
 
@@ -3367,9 +3367,9 @@ func (ec *executionContext) _Query_checkSubscribe(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(*model.Subscribe)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNSubscribe2ᚖGo_BackendᚋgraphᚋmodelᚐSubscribe(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {

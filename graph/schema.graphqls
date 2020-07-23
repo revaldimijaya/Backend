@@ -101,7 +101,7 @@ type Query{
   getReplyLike(replyid: Int!, type: String!): [LikeReply!]!
 
   getSubscribe(userid: String!):[Subscribe!]!
-  checkSubscribe(userid: String!, subscribeto: String!): Boolean!
+  checkSubscribe(userid: String!, subscribeto: String!): Subscribe!
 
 }
 

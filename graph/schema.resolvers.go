@@ -471,16 +471,12 @@ func (r *queryResolver) GetSubscribe(ctx context.Context, userid string) ([]*mod
 	return subs, nil
 }
 
-func (r *queryResolver) CheckSubscribe(ctx context.Context, userid string, subscribeto string) (bool, error) {
-	var subs []*model.Subscribe
+func (r *queryResolver) CheckSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error) {
+	var subs model.Subscribe
 
-	err := r.DB.Model(&subs).Where("user_id = ? AND subscribe_to = ?", userid, subscribeto).Select()
+	r.DB.Model(&subs).Where("user_id = ? AND subscribe_to = ?", userid, subscribeto).First()
 
-	if err != nil {
-		return false, err
-	}
-
-	return true, err
+	return &subs, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
