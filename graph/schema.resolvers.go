@@ -330,18 +330,28 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, userid string) (bo
 }
 
 func (r *mutationResolver) CreateSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error) {
-	subs := model.Subscribe{
-		UserID:      userid,
-		SubscribeTo: subscribeto,
-	}
+	var subscribe model.Subscribe
 
-	_, err := r.DB.Model(&subs).Insert()
+	err := r.DB.Model(&subscribe).Where("userid = ? AND subscribeto = ?", userid, subscribeto).First()
 
 	if err != nil {
-		return nil, errors.New("Insert new subscribe failed")
+		subs := model.Subscribe{
+			UserID:      userid,
+			SubscribeTo: subscribeto,
+		}
+
+		_, err := r.DB.Model(&subs).Insert()
+
+		if err != nil {
+			return nil, errors.New("Insert new subscribe failed")
+		}
+
+		return &subs, nil
 	}
 
-	return &subs, nil
+	r.DB.Model(&subscribe).Where("userid = ? AND subscribeto = ?", userid, subscribeto).Delete()
+
+	return nil, err
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
@@ -459,6 +469,18 @@ func (r *queryResolver) GetSubscribe(ctx context.Context, userid string) ([]*mod
 	r.DB.Model(&subs).Where("user_id = ?", userid).Select()
 
 	return subs, nil
+}
+
+func (r *queryResolver) CheckSubscribe(ctx context.Context, userid string, subscribeto string) (bool, error) {
+	var subs []*model.Subscribe
+
+	err := r.DB.Model(&subs).Where("user_id = ? AND subscribe_to = ?", userid, subscribeto).Select()
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, err
 }
 
 // Mutation returns generated.MutationResolver implementation.
