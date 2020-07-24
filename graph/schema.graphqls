@@ -103,6 +103,8 @@ type Query{
   getSubscribe :[Subscribe!]!
   checkSubscribe(userid: String!, subscribeto: String!): Subscribe!
 
+  getCategory(category: String!): [Video!]!
+
 }
 
 input newUser {

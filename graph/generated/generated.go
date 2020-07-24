@@ -96,6 +96,7 @@ type ComplexityRoot struct {
 	Query struct {
 		CheckSubscribe   func(childComplexity int, userid string, subscribeto string) int
 		Comment          func(childComplexity int, videoid int) int
+		GetCategory      func(childComplexity int, category string) int
 		GetCommentLike   func(childComplexity int, commentid int, typeArg string) int
 		GetNextVideo     func(childComplexity int, videoid int) int
 		GetReplyLike     func(childComplexity int, replyid int, typeArg string) int
@@ -186,6 +187,7 @@ type QueryResolver interface {
 	GetReplyLike(ctx context.Context, replyid int, typeArg string) ([]*model.LikeReply, error)
 	GetSubscribe(ctx context.Context) ([]*model.Subscribe, error)
 	CheckSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error)
+	GetCategory(ctx context.Context, category string) ([]*model.Video, error)
 }
 
 type executableSchema struct {
@@ -541,6 +543,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Comment(childComplexity, args["videoid"].(int)), true
+
+	case "Query.getCategory":
+		if e.complexity.Query.GetCategory == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getCategory_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetCategory(childComplexity, args["category"].(string)), true
 
 	case "Query.getCommentLike":
 		if e.complexity.Query.GetCommentLike == nil {
@@ -1059,6 +1073,8 @@ type Query{
   getSubscribe :[Subscribe!]!
   checkSubscribe(userid: String!, subscribeto: String!): Subscribe!
 
+  getCategory(category: String!): [Video!]!
+
 }
 
 input newUser {
@@ -1445,6 +1461,20 @@ func (ec *executionContext) field_Query_comment_args(ctx context.Context, rawArg
 		}
 	}
 	args["videoid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getCategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["category"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["category"] = arg0
 	return args, nil
 }
 
@@ -3452,6 +3482,47 @@ func (ec *executionContext) _Query_checkSubscribe(ctx context.Context, field gra
 	res := resTmp.(*model.Subscribe)
 	fc.Result = res
 	return ec.marshalNSubscribe2ᚖGo_BackendᚋgraphᚋmodelᚐSubscribe(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getCategory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getCategory_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetCategory(rctx, args["category"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Video)
+	fc.Result = res
+	return ec.marshalNVideo2ᚕᚖGo_BackendᚋgraphᚋmodelᚐVideoᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -6427,6 +6498,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_checkSubscribe(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getCategory":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getCategory(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

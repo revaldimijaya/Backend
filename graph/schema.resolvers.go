@@ -522,6 +522,18 @@ func (r *queryResolver) CheckSubscribe(ctx context.Context, userid string, subsc
 	return &subs, nil
 }
 
+func (r *queryResolver) GetCategory(ctx context.Context, category string) ([]*model.Video, error) {
+	var video []*model.Video
+
+	err := r.DB.Model(&video).Where("category LIKE ?",category).Order("watch DESC").Limit(20).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query users")
+	}
+
+	return video, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
