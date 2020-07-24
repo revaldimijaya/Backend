@@ -94,6 +94,7 @@ type Query{
   getVideoByUser(userid: String!): [Video!]!
   getVideoId(videoid: Int!): Video!
   getNextVideo(videoid: Int!): [Video!]!
+  getVideoTrending: [Video!]!
 
   getVideoLike(videoid: Int!, type: String!): [LikeVideo!]!
   getCommentLike(commentid: Int!, type: String!): [LikeComment!]!

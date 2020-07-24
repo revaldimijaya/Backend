@@ -470,6 +470,18 @@ func (r *queryResolver) GetNextVideo(ctx context.Context, videoid int) ([]*model
 	return video, nil
 }
 
+func (r *queryResolver) GetVideoTrending(ctx context.Context) ([]*model.Video, error) {
+	var video []*model.Video
+
+	err := r.DB.Model(&video).Order("watch DESC").Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query users")
+	}
+
+	return video, nil
+}
+
 func (r *queryResolver) GetVideoLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeVideo, error) {
 	var like []*model.LikeVideo
 

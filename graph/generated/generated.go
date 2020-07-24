@@ -94,19 +94,20 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		CheckSubscribe func(childComplexity int, userid string, subscribeto string) int
-		Comment        func(childComplexity int, videoid int) int
-		GetCommentLike func(childComplexity int, commentid int, typeArg string) int
-		GetNextVideo   func(childComplexity int, videoid int) int
-		GetReplyLike   func(childComplexity int, replyid int, typeArg string) int
-		GetSubscribe   func(childComplexity int) int
-		GetUserID      func(childComplexity int, userid string) int
-		GetVideoByUser func(childComplexity int, userid string) int
-		GetVideoID     func(childComplexity int, videoid int) int
-		GetVideoLike   func(childComplexity int, videoid int, typeArg string) int
-		Reply          func(childComplexity int, commentid int) int
-		Users          func(childComplexity int) int
-		Videos         func(childComplexity int) int
+		CheckSubscribe   func(childComplexity int, userid string, subscribeto string) int
+		Comment          func(childComplexity int, videoid int) int
+		GetCommentLike   func(childComplexity int, commentid int, typeArg string) int
+		GetNextVideo     func(childComplexity int, videoid int) int
+		GetReplyLike     func(childComplexity int, replyid int, typeArg string) int
+		GetSubscribe     func(childComplexity int) int
+		GetUserID        func(childComplexity int, userid string) int
+		GetVideoByUser   func(childComplexity int, userid string) int
+		GetVideoID       func(childComplexity int, videoid int) int
+		GetVideoLike     func(childComplexity int, videoid int, typeArg string) int
+		GetVideoTrending func(childComplexity int) int
+		Reply            func(childComplexity int, commentid int) int
+		Users            func(childComplexity int) int
+		Videos           func(childComplexity int) int
 	}
 
 	Reply struct {
@@ -179,6 +180,7 @@ type QueryResolver interface {
 	GetVideoByUser(ctx context.Context, userid string) ([]*model.Video, error)
 	GetVideoID(ctx context.Context, videoid int) (*model.Video, error)
 	GetNextVideo(ctx context.Context, videoid int) ([]*model.Video, error)
+	GetVideoTrending(ctx context.Context) ([]*model.Video, error)
 	GetVideoLike(ctx context.Context, videoid int, typeArg string) ([]*model.LikeVideo, error)
 	GetCommentLike(ctx context.Context, commentid int, typeArg string) ([]*model.LikeComment, error)
 	GetReplyLike(ctx context.Context, replyid int, typeArg string) ([]*model.LikeReply, error)
@@ -631,6 +633,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetVideoLike(childComplexity, args["videoid"].(int), args["type"].(string)), true
 
+	case "Query.getVideoTrending":
+		if e.complexity.Query.GetVideoTrending == nil {
+			break
+		}
+
+		return e.complexity.Query.GetVideoTrending(childComplexity), true
+
 	case "Query.reply":
 		if e.complexity.Query.Reply == nil {
 			break
@@ -1041,6 +1050,7 @@ type Query{
   getVideoByUser(userid: String!): [Video!]!
   getVideoId(videoid: Int!): Video!
   getNextVideo(videoid: Int!): [Video!]!
+  getVideoTrending: [Video!]!
 
   getVideoLike(videoid: Int!, type: String!): [LikeVideo!]!
   getCommentLike(commentid: Int!, type: String!): [LikeComment!]!
@@ -3196,6 +3206,40 @@ func (ec *executionContext) _Query_getNextVideo(ctx context.Context, field graph
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().GetNextVideo(rctx, args["videoid"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Video)
+	fc.Result = res
+	return ec.marshalNVideo2ᚕᚖGo_BackendᚋgraphᚋmodelᚐVideoᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getVideoTrending(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetVideoTrending(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6299,6 +6343,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getNextVideo(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getVideoTrending":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getVideoTrending(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
