@@ -514,6 +514,14 @@ func (r *queryResolver) GetSubscribe(ctx context.Context) ([]*model.Subscribe, e
 	return subs, nil
 }
 
+func (r *queryResolver) GetSubscribeByUser(ctx context.Context, userid string) ([]*model.Subscribe, error) {
+	var subs []*model.Subscribe
+
+	r.DB.Model(&subs).Where("user_id = ?", userid).Select()
+
+	return subs, nil
+}
+
 func (r *queryResolver) CheckSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error) {
 	var subs model.Subscribe
 
@@ -525,7 +533,7 @@ func (r *queryResolver) CheckSubscribe(ctx context.Context, userid string, subsc
 func (r *queryResolver) GetCategory(ctx context.Context, category string) ([]*model.Video, error) {
 	var video []*model.Video
 
-	err := r.DB.Model(&video).Where("category LIKE ?",category).Order("watch DESC").Limit(20).Select()
+	err := r.DB.Model(&video).Where("category LIKE ?", category).Order("watch DESC").Limit(20).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query users")
