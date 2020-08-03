@@ -373,6 +373,44 @@ func (r *mutationResolver) CreateSubscribe(ctx context.Context, userid string, s
 	return nil, err
 }
 
+func (r *mutationResolver) CreatePlaylist(ctx context.Context, input *model.NewPlaylist) (*model.Playlist, error) {
+	playlist := model.Playlist{
+		Name:        input.Name,
+		Description: input.Description,
+		Second:      input.Second,
+		Minute:      input.Minute,
+		Hour:        input.Hour,
+		Day:         input.Day,
+		Month:       input.Month,
+		Year:        input.Year,
+		Privacy:     input.Privacy,
+		UserID:      input.UserID,
+	}
+
+	_, err := r.DB.Model(&playlist).Insert()
+
+	if err != nil {
+		return nil, errors.New("Insert new playlist failed")
+	}
+
+	return &playlist, nil
+}
+
+func (r *mutationResolver) CreateDetailPlaylist(ctx context.Context, playlistid int, videoid int) (*model.DetailPlaylist, error) {
+	detail := model.DetailPlaylist{
+		PlaylistID: playlistid,
+		VideoID:    videoid,
+	}
+
+	_, err := r.DB.Model(&detail).Insert()
+
+	if err != nil {
+		return nil, errors.New("Insert new detail failed")
+	}
+
+	return &detail, nil
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var user []*model.User
 
@@ -540,6 +578,43 @@ func (r *queryResolver) GetCategory(ctx context.Context, category string) ([]*mo
 	}
 
 	return video, nil
+}
+
+func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error) {
+	var playlist []*model.Playlist
+
+	err := r.DB.Model(&playlist).Order("id").Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query users")
+	}
+
+	return playlist, nil
+
+}
+
+func (r *queryResolver) GetPlaylistID(ctx context.Context, playlistid int) ([]*model.Playlist, error) {
+	var playlist []*model.Playlist
+
+	err := r.DB.Model(&playlist).Where("id = ?", playlistid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlist")
+	}
+
+	return playlist, nil
+}
+
+func (r *queryResolver) GetPlaylistVideo(ctx context.Context, playlistid int) ([]*model.DetailPlaylist, error) {
+	var playlist []*model.DetailPlaylist
+
+	err := r.DB.Model(&playlist).Where("playlist_id = ?", playlistid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlist")
+	}
+
+	return playlist, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

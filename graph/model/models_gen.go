@@ -14,6 +14,12 @@ type Comment struct {
 	Year    int    `json:"year"`
 }
 
+type DetailPlaylist struct {
+	ID         string `json:"id"`
+	PlaylistID int    `json:"playlist_id"`
+	VideoID    int    `json:"video_id"`
+}
+
 type LikeComment struct {
 	ID        string `json:"id"`
 	UserID    string `json:"user_id"`
@@ -33,6 +39,20 @@ type LikeVideo struct {
 	UserID  string `json:"user_id"`
 	VideoID int    `json:"video_id"`
 	Type    string `json:"type"`
+}
+
+type Playlist struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Second      int    `json:"second"`
+	Minute      int    `json:"minute"`
+	Hour        int    `json:"hour"`
+	Day         int    `json:"day"`
+	Month       int    `json:"month"`
+	Year        int    `json:"year"`
+	Privacy     string `json:"privacy"`
+	UserID      string `json:"user_id"`
 }
 
 type Reply struct {
@@ -88,6 +108,19 @@ type NewComment struct {
 	Day     int    `json:"day"`
 	Month   int    `json:"month"`
 	Year    int    `json:"year"`
+}
+
+type NewPlaylist struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Second      int    `json:"second"`
+	Minute      int    `json:"minute"`
+	Hour        int    `json:"hour"`
+	Day         int    `json:"day"`
+	Month       int    `json:"month"`
+	Year        int    `json:"year"`
+	Privacy     string `json:"privacy"`
+	UserID      string `json:"user_id"`
 }
 
 type NewReply struct {

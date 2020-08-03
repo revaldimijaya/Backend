@@ -84,28 +84,37 @@ input newReply {
   year: Int!
 }
 
-type Query{
-  users: [User!]!
-  videos: [Video!]!
-  comment(videoid: Int!): [Comment!]!
-  reply(commentid: Int!): [Reply!]!
+type Playlist {
+  id: ID!
+  name: String!
+  description: String!
+  second: Int!
+  minute: Int!
+  hour: Int!
+  day: Int!
+  month: Int!
+  year: Int!
+  privacy: String!
+  user_id: String!
+}
 
-  getUserId(userid: String!): User!
-  getVideoByUser(userid: String!): [Video!]!
-  getVideoId(videoid: Int!): Video!
-  getNextVideo(videoid: Int!): [Video!]!
-  getVideoTrending: [Video!]!
+input newPlaylist {
+  name: String!
+  description: String!
+  second: Int!
+  minute: Int!
+  hour: Int!
+  day: Int!
+  month: Int!
+  year: Int!
+  privacy: String!
+  user_id: String!
+}
 
-  getVideoLike(videoid: Int!, type: String!): [LikeVideo!]!
-  getCommentLike(commentid: Int!, type: String!): [LikeComment!]!
-  getReplyLike(replyid: Int!, type: String!): [LikeReply!]!
-
-  getSubscribe :[Subscribe!]!
-  getSubscribeByUser(userid: String!): [Subscribe!]!
-  checkSubscribe(userid: String!, subscribeto: String!): Subscribe!
-
-  getCategory(category: String!): [Video!]!
-
+type DetailPlaylist {
+  id: ID!
+  playlist_id: Int!
+  video_id: Int!
 }
 
 input newUser {
@@ -146,6 +155,34 @@ input newComment {
   year: Int!
 }
 
+type Query{
+  users: [User!]!
+  videos: [Video!]!
+  comment(videoid: Int!): [Comment!]!
+  reply(commentid: Int!): [Reply!]!
+
+  getUserId(userid: String!): User!
+  getVideoByUser(userid: String!): [Video!]!
+  getVideoId(videoid: Int!): Video!
+  getNextVideo(videoid: Int!): [Video!]!
+  getVideoTrending: [Video!]!
+
+  getVideoLike(videoid: Int!, type: String!): [LikeVideo!]!
+  getCommentLike(commentid: Int!, type: String!): [LikeComment!]!
+  getReplyLike(replyid: Int!, type: String!): [LikeReply!]!
+
+  getSubscribe :[Subscribe!]!
+  getSubscribeByUser(userid: String!): [Subscribe!]!
+  checkSubscribe(userid: String!, subscribeto: String!): Subscribe!
+
+  getCategory(category: String!): [Video!]!
+
+  playlists: [Playlist!]!
+  getPlaylistId(playlistid: Int!): [Playlist!]!
+  getPlaylistVideo(playlistid: Int!): [DetailPlaylist!]!
+}
+
+
 type Mutation {
   createUser (input: newUser): User!
   updateUser (id: String!, input: newUser): User!
@@ -167,5 +204,8 @@ type Mutation {
   createReply (input: newReply): Reply!
 
   createSubscribe(userid: String!, subscribeto: String!): Subscribe!
+
+  createPlaylist(input: newPlaylist): Playlist!
+  createDetailPlaylist(playlistid: Int!, videoid: Int!): DetailPlaylist!
 }
 
