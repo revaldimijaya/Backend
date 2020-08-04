@@ -206,6 +206,9 @@ type Mutation {
   createSubscribe(userid: String!, subscribeto: String!): Subscribe!
 
   createPlaylist(input: newPlaylist): Playlist!
+  deletePlaylist(id: Int!): Boolean!
+
   createDetailPlaylist(playlistid: Int!, videoid: Int!): DetailPlaylist!
+  deleteDetailPlaylist(id: Int!): Boolean!
 }
 

@@ -92,6 +92,8 @@ type ComplexityRoot struct {
 		CreateUser           func(childComplexity int, input *model.NewUser) int
 		CreateVideo          func(childComplexity int, input *model.NewVideo) int
 		DeleteComment        func(childComplexity int, userid string) int
+		DeleteDetailPlaylist func(childComplexity int, id int) int
+		DeletePlaylist       func(childComplexity int, id int) int
 		DeleteUser           func(childComplexity int, id string) int
 		DeleteVideo          func(childComplexity int, id string) int
 		ReplyLike            func(childComplexity int, id int, userid string, typeArg string) int
@@ -198,7 +200,9 @@ type MutationResolver interface {
 	CreateReply(ctx context.Context, input *model.NewReply) (*model.Reply, error)
 	CreateSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error)
 	CreatePlaylist(ctx context.Context, input *model.NewPlaylist) (*model.Playlist, error)
+	DeletePlaylist(ctx context.Context, id int) (bool, error)
 	CreateDetailPlaylist(ctx context.Context, playlistid int, videoid int) (*model.DetailPlaylist, error)
+	DeleteDetailPlaylist(ctx context.Context, id int) (bool, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
@@ -512,6 +516,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteComment(childComplexity, args["userid"].(string)), true
+
+	case "Mutation.deleteDetailPlaylist":
+		if e.complexity.Mutation.DeleteDetailPlaylist == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteDetailPlaylist_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteDetailPlaylist(childComplexity, args["id"].(int)), true
+
+	case "Mutation.deletePlaylist":
+		if e.complexity.Mutation.DeletePlaylist == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deletePlaylist_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeletePlaylist(childComplexity, args["id"].(int)), true
 
 	case "Mutation.deleteUser":
 		if e.complexity.Mutation.DeleteUser == nil {
@@ -1373,7 +1401,10 @@ type Mutation {
   createSubscribe(userid: String!, subscribeto: String!): Subscribe!
 
   createPlaylist(input: newPlaylist): Playlist!
+  deletePlaylist(id: Int!): Boolean!
+
   createDetailPlaylist(playlistid: Int!, videoid: Int!): DetailPlaylist!
+  deleteDetailPlaylist(id: Int!): Boolean!
 }
 
 `, BuiltIn: false},
@@ -1539,6 +1570,34 @@ func (ec *executionContext) field_Mutation_deleteComment_args(ctx context.Contex
 		}
 	}
 	args["userid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteDetailPlaylist_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deletePlaylist_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -3397,6 +3456,47 @@ func (ec *executionContext) _Mutation_createPlaylist(ctx context.Context, field 
 	return ec.marshalNPlaylist2ᚖGo_BackendᚋgraphᚋmodelᚐPlaylist(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_deletePlaylist(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deletePlaylist_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeletePlaylist(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createDetailPlaylist(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3436,6 +3536,47 @@ func (ec *executionContext) _Mutation_createDetailPlaylist(ctx context.Context, 
 	res := resTmp.(*model.DetailPlaylist)
 	fc.Result = res
 	return ec.marshalNDetailPlaylist2ᚖGo_BackendᚋgraphᚋmodelᚐDetailPlaylist(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteDetailPlaylist(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteDetailPlaylist_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteDetailPlaylist(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Playlist_id(ctx context.Context, field graphql.CollectedField, obj *model.Playlist) (ret graphql.Marshaler) {
@@ -7426,8 +7567,18 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "deletePlaylist":
+			out.Values[i] = ec._Mutation_deletePlaylist(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createDetailPlaylist":
 			out.Values[i] = ec._Mutation_createDetailPlaylist(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteDetailPlaylist":
+			out.Values[i] = ec._Mutation_deleteDetailPlaylist(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

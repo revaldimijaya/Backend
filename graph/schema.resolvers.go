@@ -396,6 +396,24 @@ func (r *mutationResolver) CreatePlaylist(ctx context.Context, input *model.NewP
 	return &playlist, nil
 }
 
+func (r *mutationResolver) DeletePlaylist(ctx context.Context, id int) (bool, error) {
+	var playlist model.Playlist
+
+	err := r.DB.Model(&playlist).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("playlist not found!")
+	}
+
+	_, deleteErr := r.DB.Model(&playlist).Where("id = ?", id).Delete()
+
+	if deleteErr != nil {
+		return false, errors.New("Delete playlist failed")
+	}
+
+	return true, nil
+}
+
 func (r *mutationResolver) CreateDetailPlaylist(ctx context.Context, playlistid int, videoid int) (*model.DetailPlaylist, error) {
 	detail := model.DetailPlaylist{
 		PlaylistID: playlistid,
@@ -409,6 +427,24 @@ func (r *mutationResolver) CreateDetailPlaylist(ctx context.Context, playlistid 
 	}
 
 	return &detail, nil
+}
+
+func (r *mutationResolver) DeleteDetailPlaylist(ctx context.Context, id int) (bool, error) {
+	var detail model.DetailPlaylist
+
+	err := r.DB.Model(&detail).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("detail not found!")
+	}
+
+	_, deleteErr := r.DB.Model(&detail).Where("id = ?", id).Delete()
+
+	if deleteErr != nil {
+		return false, errors.New("Delete detail failed")
+	}
+
+	return true, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
@@ -590,7 +626,6 @@ func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error
 	}
 
 	return playlist, nil
-
 }
 
 func (r *queryResolver) GetPlaylistID(ctx context.Context, playlistid int) ([]*model.Playlist, error) {
