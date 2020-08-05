@@ -385,6 +385,7 @@ func (r *mutationResolver) CreatePlaylist(ctx context.Context, input *model.NewP
 		Year:        input.Year,
 		Privacy:     input.Privacy,
 		UserID:      input.UserID,
+		Views: input.Views,
 	}
 
 	_, err := r.DB.Model(&playlist).Insert()

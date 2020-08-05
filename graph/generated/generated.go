@@ -114,6 +114,7 @@ type ComplexityRoot struct {
 		Privacy     func(childComplexity int) int
 		Second      func(childComplexity int) int
 		UserID      func(childComplexity int) int
+		Views       func(childComplexity int) int
 		Year        func(childComplexity int) int
 	}
 
@@ -694,6 +695,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Playlist.UserID(childComplexity), true
+
+	case "Playlist.views":
+		if e.complexity.Playlist.Views == nil {
+			break
+		}
+
+		return e.complexity.Playlist.Views(childComplexity), true
 
 	case "Playlist.year":
 		if e.complexity.Playlist.Year == nil {
@@ -1291,6 +1299,7 @@ type Playlist {
   year: Int!
   privacy: String!
   user_id: String!
+  views: Int!
 }
 
 input newPlaylist {
@@ -1304,6 +1313,7 @@ input newPlaylist {
   year: Int!
   privacy: String!
   user_id: String!
+  views: Int!
 }
 
 type DetailPlaylist {
@@ -3951,6 +3961,40 @@ func (ec *executionContext) _Playlist_user_id(ctx context.Context, field graphql
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Playlist_views(ctx context.Context, field graphql.CollectedField, obj *model.Playlist) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Playlist",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Views, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -7035,6 +7079,12 @@ func (ec *executionContext) unmarshalInputnewPlaylist(ctx context.Context, obj i
 			if err != nil {
 				return it, err
 			}
+		case "views":
+			var err error
+			it.Views, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -7656,6 +7706,11 @@ func (ec *executionContext) _Playlist(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "user_id":
 			out.Values[i] = ec._Playlist_user_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "views":
+			out.Values[i] = ec._Playlist_views(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

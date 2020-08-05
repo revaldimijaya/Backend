@@ -53,6 +53,7 @@ type Playlist struct {
 	Year        int    `json:"year"`
 	Privacy     string `json:"privacy"`
 	UserID      string `json:"user_id"`
+	Views       int    `json:"views"`
 }
 
 type Reply struct {
@@ -121,6 +122,7 @@ type NewPlaylist struct {
 	Year        int    `json:"year"`
 	Privacy     string `json:"privacy"`
 	UserID      string `json:"user_id"`
+	Views       int    `json:"views"`
 }
 
 type NewReply struct {

@@ -96,6 +96,7 @@ type Playlist {
   year: Int!
   privacy: String!
   user_id: String!
+  views: Int!
 }
 
 input newPlaylist {
@@ -109,6 +110,7 @@ input newPlaylist {
   year: Int!
   privacy: String!
   user_id: String!
+  views: Int!
 }
 
 type DetailPlaylist {
