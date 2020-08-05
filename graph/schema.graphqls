@@ -209,6 +209,8 @@ type Mutation {
 
   createPlaylist(input: newPlaylist): Playlist!
   deletePlaylist(id: Int!): Boolean!
+  updatePlaylist(id: Int!, title: String!, privacy: String!, description: String!): Playlist!
+  viewPlaylist(id: Int!): Boolean!
 
   createDetailPlaylist(playlistid: Int!, videoid: Int!): DetailPlaylist!
   deleteDetailPlaylist(id: Int!): Boolean!

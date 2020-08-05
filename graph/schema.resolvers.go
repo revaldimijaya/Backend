@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error) {
@@ -385,7 +386,7 @@ func (r *mutationResolver) CreatePlaylist(ctx context.Context, input *model.NewP
 		Year:        input.Year,
 		Privacy:     input.Privacy,
 		UserID:      input.UserID,
-		Views: input.Views,
+		Views:       input.Views,
 	}
 
 	_, err := r.DB.Model(&playlist).Insert()
@@ -410,6 +411,55 @@ func (r *mutationResolver) DeletePlaylist(ctx context.Context, id int) (bool, er
 
 	if deleteErr != nil {
 		return false, errors.New("Delete playlist failed")
+	}
+
+	return true, nil
+}
+
+func (r *mutationResolver) UpdatePlaylist(ctx context.Context, id int, title string, privacy string, description string) (*model.Playlist, error) {
+	var playlist model.Playlist
+
+	err := r.DB.Model(&playlist).Where("id = ?", id).First()
+
+	if err != nil {
+		return nil, errors.New("user not found!")
+	}
+
+	playlist.Name = title
+	playlist.Privacy = privacy
+	playlist.Description = description
+	playlist.Second = time.Now().Second()
+	playlist.Minute = time.Now().Minute()
+	playlist.Hour = time.Now().Hour()
+	playlist.Day = time.Now().Day()
+	playlist.Month = int(time.Now().Month())
+	playlist.Year = time.Now().Year()
+
+
+	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		return nil, errors.New("Update playlist failed")
+	}
+
+	return &playlist, nil
+}
+
+func (r *mutationResolver) ViewPlaylist(ctx context.Context, id int) (bool, error) {
+	var playlist model.Playlist
+
+	err := r.DB.Model(&playlist).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("user not found!")
+	}
+
+	playlist.Views += 1
+
+	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
+
+	if updateErr != nil {
+		return false, errors.New("Update playlist failed")
 	}
 
 	return true, nil
