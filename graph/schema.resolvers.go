@@ -424,16 +424,16 @@ func (r *mutationResolver) UpdatePlaylist(ctx context.Context, id int, title str
 	if err != nil {
 		return nil, errors.New("user not found!")
 	}
-
+	location,_ := time.LoadLocation("Asia/Indonesia")
 	playlist.Name = title
 	playlist.Privacy = privacy
 	playlist.Description = description
-	playlist.Second = time.Now().Second()
-	playlist.Minute = time.Now().Minute()
-	playlist.Hour = time.Now().Hour()
-	playlist.Day = time.Now().Day()
-	playlist.Month = int(time.Now().Month())
-	playlist.Year = time.Now().Year()
+	playlist.Second = time.Now().In(location).Second()
+	playlist.Minute = time.Now().In(location).Minute()
+	playlist.Hour = time.Now().In(location).Hour()
+	playlist.Day = time.Now().In(location).Day()
+	playlist.Month = int(time.Now().In(location).Month())
+	playlist.Year = time.Now().In(location).Year()
 
 
 	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
