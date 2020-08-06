@@ -424,7 +424,7 @@ func (r *mutationResolver) UpdatePlaylist(ctx context.Context, id int, title str
 	if err != nil {
 		return nil, errors.New("user not found!")
 	}
-	location,_ := time.LoadLocation("Asia/Indonesia")
+	location,_ := time.LoadLocation("Asia/Jakarta")
 	playlist.Name = title
 	playlist.Privacy = privacy
 	playlist.Description = description
