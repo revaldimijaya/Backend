@@ -47,9 +47,12 @@ type ComplexityRoot struct {
 		Comment func(childComplexity int) int
 		Day     func(childComplexity int) int
 		Dislike func(childComplexity int) int
+		Hour    func(childComplexity int) int
 		ID      func(childComplexity int) int
 		Like    func(childComplexity int) int
+		Minute  func(childComplexity int) int
 		Month   func(childComplexity int) int
+		Second  func(childComplexity int) int
 		UserID  func(childComplexity int) int
 		VideoID func(childComplexity int) int
 		Year    func(childComplexity int) int
@@ -145,9 +148,12 @@ type ComplexityRoot struct {
 	Reply struct {
 		CommentID func(childComplexity int) int
 		Day       func(childComplexity int) int
+		Hour      func(childComplexity int) int
 		ID        func(childComplexity int) int
+		Minute    func(childComplexity int) int
 		Month     func(childComplexity int) int
 		Reply     func(childComplexity int) int
+		Second    func(childComplexity int) int
 		UserID    func(childComplexity int) int
 		Year      func(childComplexity int) int
 	}
@@ -171,13 +177,17 @@ type ComplexityRoot struct {
 		Day         func(childComplexity int) int
 		Description func(childComplexity int) int
 		Dislike     func(childComplexity int) int
+		Duration    func(childComplexity int) int
+		Hour        func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Like        func(childComplexity int) int
 		Location    func(childComplexity int) int
+		Minute      func(childComplexity int) int
 		Month       func(childComplexity int) int
 		Name        func(childComplexity int) int
 		Premium     func(childComplexity int) int
 		Restriction func(childComplexity int) int
+		Second      func(childComplexity int) int
 		Thumbnail   func(childComplexity int) int
 		URL         func(childComplexity int) int
 		UserID      func(childComplexity int) int
@@ -267,6 +277,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.Dislike(childComplexity), true
 
+	case "Comment.hour":
+		if e.complexity.Comment.Hour == nil {
+			break
+		}
+
+		return e.complexity.Comment.Hour(childComplexity), true
+
 	case "Comment.id":
 		if e.complexity.Comment.ID == nil {
 			break
@@ -281,12 +298,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.Like(childComplexity), true
 
+	case "Comment.minute":
+		if e.complexity.Comment.Minute == nil {
+			break
+		}
+
+		return e.complexity.Comment.Minute(childComplexity), true
+
 	case "Comment.month":
 		if e.complexity.Comment.Month == nil {
 			break
 		}
 
 		return e.complexity.Comment.Month(childComplexity), true
+
+	case "Comment.second":
+		if e.complexity.Comment.Second == nil {
+			break
+		}
+
+		return e.complexity.Comment.Second(childComplexity), true
 
 	case "Comment.user_id":
 		if e.complexity.Comment.UserID == nil {
@@ -955,12 +986,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Reply.Day(childComplexity), true
 
+	case "Reply.hour":
+		if e.complexity.Reply.Hour == nil {
+			break
+		}
+
+		return e.complexity.Reply.Hour(childComplexity), true
+
 	case "Reply.id":
 		if e.complexity.Reply.ID == nil {
 			break
 		}
 
 		return e.complexity.Reply.ID(childComplexity), true
+
+	case "Reply.minute":
+		if e.complexity.Reply.Minute == nil {
+			break
+		}
+
+		return e.complexity.Reply.Minute(childComplexity), true
 
 	case "Reply.month":
 		if e.complexity.Reply.Month == nil {
@@ -975,6 +1020,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Reply.Reply(childComplexity), true
+
+	case "Reply.second":
+		if e.complexity.Reply.Second == nil {
+			break
+		}
+
+		return e.complexity.Reply.Second(childComplexity), true
 
 	case "Reply.user_id":
 		if e.complexity.Reply.UserID == nil {
@@ -1074,6 +1126,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Video.Dislike(childComplexity), true
 
+	case "Video.duration":
+		if e.complexity.Video.Duration == nil {
+			break
+		}
+
+		return e.complexity.Video.Duration(childComplexity), true
+
+	case "Video.hour":
+		if e.complexity.Video.Hour == nil {
+			break
+		}
+
+		return e.complexity.Video.Hour(childComplexity), true
+
 	case "Video.id":
 		if e.complexity.Video.ID == nil {
 			break
@@ -1094,6 +1160,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Video.Location(childComplexity), true
+
+	case "Video.minute":
+		if e.complexity.Video.Minute == nil {
+			break
+		}
+
+		return e.complexity.Video.Minute(childComplexity), true
 
 	case "Video.month":
 		if e.complexity.Video.Month == nil {
@@ -1122,6 +1195,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Video.Restriction(childComplexity), true
+
+	case "Video.second":
+		if e.complexity.Video.Second == nil {
+			break
+		}
+
+		return e.complexity.Video.Second(childComplexity), true
 
 	case "Video.thumbnail":
 		if e.complexity.Video.Thumbnail == nil {
@@ -1255,6 +1335,10 @@ type Video {
   day: Int!
   month: Int!
   year: Int!
+  second: Int!
+  minute: Int!
+  hour: Int!
+  duration: Int!
 }
 
 type Comment {
@@ -1267,6 +1351,9 @@ type Comment {
   day: Int!
   month: Int!
   year: Int!
+  second: Int!
+  minute: Int!
+  hour: Int!
 }
 
 type Reply {
@@ -1277,6 +1364,9 @@ type Reply {
   day: Int!
   month: Int!
   year: Int!
+  second: Int!
+  minute: Int!
+  hour: Int!
 }
 
 type LikeVideo {
@@ -1310,9 +1400,6 @@ input newReply {
   user_id: String!
   comment_id: Int!
   reply: String!
-  day: Int!
-  month: Int!
-  year: Int!
 }
 
 type Playlist {
@@ -1333,12 +1420,6 @@ type Playlist {
 input newPlaylist {
   name: String!
   description: String!
-  second: Int!
-  minute: Int!
-  hour: Int!
-  day: Int!
-  month: Int!
-  year: Int!
   privacy: String!
   user_id: String!
   views: Int!
@@ -1372,9 +1453,7 @@ input newVideo {
   thumbnail: String!
   description: String!
   visibility: String!
-  day: Int!
-  month: Int!
-  year: Int!
+  duration: Int!
 }
 
 input newComment {
@@ -1383,9 +1462,6 @@ input newComment {
   comment: String!
   like: Int!
   dislike: Int!
-  day: Int!
-  month: Int!
-  year: Int!
 }
 
 type Query{
@@ -2407,6 +2483,108 @@ func (ec *executionContext) _Comment_year(ctx context.Context, field graphql.Col
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Year, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Comment_second(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Comment",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Second, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Comment_minute(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Comment",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Minute, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Comment_hour(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Comment",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Hour, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5212,6 +5390,108 @@ func (ec *executionContext) _Reply_year(ctx context.Context, field graphql.Colle
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Reply_second(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Reply",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Second, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Reply_minute(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Reply",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Minute, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Reply_hour(ctx context.Context, field graphql.CollectedField, obj *model.Reply) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Reply",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Hour, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Subscribe_id(ctx context.Context, field graphql.CollectedField, obj *model.Subscribe) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -6046,6 +6326,142 @@ func (ec *executionContext) _Video_year(ctx context.Context, field graphql.Colle
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Year, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Video_second(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Second, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Video_minute(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Minute, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Video_hour(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Hour, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Video_duration(ctx context.Context, field graphql.CollectedField, obj *model.Video) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Video",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Duration, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7153,24 +7569,6 @@ func (ec *executionContext) unmarshalInputnewComment(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
-		case "day":
-			var err error
-			it.Day, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "month":
-			var err error
-			it.Month, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "year":
-			var err error
-			it.Year, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		}
 	}
 
@@ -7192,42 +7590,6 @@ func (ec *executionContext) unmarshalInputnewPlaylist(ctx context.Context, obj i
 		case "description":
 			var err error
 			it.Description, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "second":
-			var err error
-			it.Second, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "minute":
-			var err error
-			it.Minute, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hour":
-			var err error
-			it.Hour, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "day":
-			var err error
-			it.Day, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "month":
-			var err error
-			it.Month, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "year":
-			var err error
-			it.Year, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7276,24 +7638,6 @@ func (ec *executionContext) unmarshalInputnewReply(ctx context.Context, obj inte
 		case "reply":
 			var err error
 			it.Reply, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "day":
-			var err error
-			it.Day, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "month":
-			var err error
-			it.Month, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "year":
-			var err error
-			it.Year, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7429,21 +7773,9 @@ func (ec *executionContext) unmarshalInputnewVideo(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "day":
+		case "duration":
 			var err error
-			it.Day, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "month":
-			var err error
-			it.Month, err = ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "year":
-			var err error
-			it.Year, err = ec.unmarshalNInt2int(ctx, v)
+			it.Duration, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7514,6 +7846,21 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "year":
 			out.Values[i] = ec._Comment_year(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "second":
+			out.Values[i] = ec._Comment_second(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "minute":
+			out.Values[i] = ec._Comment_minute(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "hour":
+			out.Values[i] = ec._Comment_hour(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -8241,6 +8588,21 @@ func (ec *executionContext) _Reply(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "second":
+			out.Values[i] = ec._Reply_second(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "minute":
+			out.Values[i] = ec._Reply_minute(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "hour":
+			out.Values[i] = ec._Reply_hour(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8429,6 +8791,26 @@ func (ec *executionContext) _Video(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "year":
 			out.Values[i] = ec._Video_year(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "second":
+			out.Values[i] = ec._Video_second(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "minute":
+			out.Values[i] = ec._Video_minute(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "hour":
+			out.Values[i] = ec._Video_hour(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "duration":
+			out.Values[i] = ec._Video_duration(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

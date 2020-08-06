@@ -71,6 +71,14 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 }
 
 func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVideo) (*model.Video, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	Second := time.Now().In(location).Second()
+	Minute := time.Now().In(location).Minute()
+	Hour := time.Now().In(location).Hour()
+	Day := time.Now().In(location).Day()
+	Month := int(time.Now().In(location).Month())
+	Year := time.Now().In(location).Year()
+
 	video := model.Video{
 		UserID:      input.UserID,
 		URL:         input.URL,
@@ -85,9 +93,13 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 		Category:    input.Category,
 		Description: input.Description,
 		Visibility:  input.Visibility,
-		Day:         input.Day,
-		Month:       input.Month,
-		Year:        input.Year,
+		Day:         Day,
+		Month:       Month,
+		Year:        Year,
+		Second:      Second,
+		Minute:      Minute,
+		Hour:        Hour,
+		Duration:    input.Duration,
 	}
 
 	_, err := r.DB.Model(&video).Insert()
@@ -306,15 +318,26 @@ func (r *mutationResolver) DeleteVideo(ctx context.Context, id string) (bool, er
 }
 
 func (r *mutationResolver) CreateComment(ctx context.Context, input *model.NewComment) (*model.Comment, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	Second := time.Now().In(location).Second()
+	Minute := time.Now().In(location).Minute()
+	Hour := time.Now().In(location).Hour()
+	Day := time.Now().In(location).Day()
+	Month := int(time.Now().In(location).Month())
+	Year := time.Now().In(location).Year()
+
 	comment := model.Comment{
 		UserID:  input.UserID,
 		VideoID: input.VideoID,
 		Comment: input.Comment,
 		Like:    input.Like,
 		Dislike: input.Dislike,
-		Day:     input.Day,
-		Month:   input.Month,
-		Year:    input.Year,
+		Day:     Day,
+		Month:   Month,
+		Year:    Year,
+		Second: Second,
+		Minute: Minute,
+		Hour: Hour,
 	}
 
 	_, err := r.DB.Model(&comment).Insert()
@@ -331,13 +354,24 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, userid string) (bo
 }
 
 func (r *mutationResolver) CreateReply(ctx context.Context, input *model.NewReply) (*model.Reply, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	Second := time.Now().In(location).Second()
+	Minute := time.Now().In(location).Minute()
+	Hour := time.Now().In(location).Hour()
+	Day := time.Now().In(location).Day()
+	Month := int(time.Now().In(location).Month())
+	Year := time.Now().In(location).Year()
+
 	reply := model.Reply{
 		UserID:    input.UserID,
 		CommentID: input.CommentID,
 		Reply:     input.Reply,
-		Day:       input.Day,
-		Month:     input.Month,
-		Year:      input.Year,
+		Day:       Day,
+		Month:     Month,
+		Year:      Year,
+		Second: Second,
+		Minute: Minute,
+		Hour: Hour,
 	}
 
 	_, err := r.DB.Model(&reply).Insert()
@@ -375,15 +409,23 @@ func (r *mutationResolver) CreateSubscribe(ctx context.Context, userid string, s
 }
 
 func (r *mutationResolver) CreatePlaylist(ctx context.Context, input *model.NewPlaylist) (*model.Playlist, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	Second := time.Now().In(location).Second()
+	Minute := time.Now().In(location).Minute()
+	Hour := time.Now().In(location).Hour()
+	Day := time.Now().In(location).Day()
+	Month := int(time.Now().In(location).Month())
+	Year := time.Now().In(location).Year()
+
 	playlist := model.Playlist{
 		Name:        input.Name,
 		Description: input.Description,
-		Second:      input.Second,
-		Minute:      input.Minute,
-		Hour:        input.Hour,
-		Day:         input.Day,
-		Month:       input.Month,
-		Year:        input.Year,
+		Second:      Second,
+		Minute:      Minute,
+		Hour:        Hour,
+		Day:         Day,
+		Month:       Month,
+		Year:        Year,
 		Privacy:     input.Privacy,
 		UserID:      input.UserID,
 		Views:       input.Views,
@@ -424,7 +466,7 @@ func (r *mutationResolver) UpdatePlaylist(ctx context.Context, id int, title str
 	if err != nil {
 		return nil, errors.New("user not found!")
 	}
-	location,_ := time.LoadLocation("Asia/Jakarta")
+	location, _ := time.LoadLocation("Asia/Jakarta")
 	playlist.Name = title
 	playlist.Privacy = privacy
 	playlist.Description = description
@@ -434,7 +476,6 @@ func (r *mutationResolver) UpdatePlaylist(ctx context.Context, id int, title str
 	playlist.Day = time.Now().In(location).Day()
 	playlist.Month = int(time.Now().In(location).Month())
 	playlist.Year = time.Now().In(location).Year()
-
 
 	_, updateErr := r.DB.Model(&playlist).Where("id = ?", id).Update()
 

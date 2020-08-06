@@ -24,6 +24,10 @@ type Video {
   day: Int!
   month: Int!
   year: Int!
+  second: Int!
+  minute: Int!
+  hour: Int!
+  duration: Int!
 }
 
 type Comment {
@@ -36,6 +40,9 @@ type Comment {
   day: Int!
   month: Int!
   year: Int!
+  second: Int!
+  minute: Int!
+  hour: Int!
 }
 
 type Reply {
@@ -46,6 +53,9 @@ type Reply {
   day: Int!
   month: Int!
   year: Int!
+  second: Int!
+  minute: Int!
+  hour: Int!
 }
 
 type LikeVideo {
@@ -79,9 +89,6 @@ input newReply {
   user_id: String!
   comment_id: Int!
   reply: String!
-  day: Int!
-  month: Int!
-  year: Int!
 }
 
 type Playlist {
@@ -102,12 +109,6 @@ type Playlist {
 input newPlaylist {
   name: String!
   description: String!
-  second: Int!
-  minute: Int!
-  hour: Int!
-  day: Int!
-  month: Int!
-  year: Int!
   privacy: String!
   user_id: String!
   views: Int!
@@ -141,9 +142,7 @@ input newVideo {
   thumbnail: String!
   description: String!
   visibility: String!
-  day: Int!
-  month: Int!
-  year: Int!
+  duration: Int!
 }
 
 input newComment {
@@ -152,9 +151,6 @@ input newComment {
   comment: String!
   like: Int!
   dislike: Int!
-  day: Int!
-  month: Int!
-  year: Int!
 }
 
 type Query{

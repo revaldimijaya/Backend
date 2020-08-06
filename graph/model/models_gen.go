@@ -12,6 +12,9 @@ type Comment struct {
 	Day     int    `json:"day"`
 	Month   int    `json:"month"`
 	Year    int    `json:"year"`
+	Second  int    `json:"second"`
+	Minute  int    `json:"minute"`
+	Hour    int    `json:"hour"`
 }
 
 type DetailPlaylist struct {
@@ -64,6 +67,9 @@ type Reply struct {
 	Day       int    `json:"day"`
 	Month     int    `json:"month"`
 	Year      int    `json:"year"`
+	Second    int    `json:"second"`
+	Minute    int    `json:"minute"`
+	Hour      int    `json:"hour"`
 }
 
 type Subscribe struct {
@@ -98,6 +104,10 @@ type Video struct {
 	Day         int    `json:"day"`
 	Month       int    `json:"month"`
 	Year        int    `json:"year"`
+	Second      int    `json:"second"`
+	Minute      int    `json:"minute"`
+	Hour        int    `json:"hour"`
+	Duration    int    `json:"duration"`
 }
 
 type NewComment struct {
@@ -106,20 +116,11 @@ type NewComment struct {
 	Comment string `json:"comment"`
 	Like    int    `json:"like"`
 	Dislike int    `json:"dislike"`
-	Day     int    `json:"day"`
-	Month   int    `json:"month"`
-	Year    int    `json:"year"`
 }
 
 type NewPlaylist struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Second      int    `json:"second"`
-	Minute      int    `json:"minute"`
-	Hour        int    `json:"hour"`
-	Day         int    `json:"day"`
-	Month       int    `json:"month"`
-	Year        int    `json:"year"`
 	Privacy     string `json:"privacy"`
 	UserID      string `json:"user_id"`
 	Views       int    `json:"views"`
@@ -129,9 +130,6 @@ type NewReply struct {
 	UserID    string `json:"user_id"`
 	CommentID int    `json:"comment_id"`
 	Reply     string `json:"reply"`
-	Day       int    `json:"day"`
-	Month     int    `json:"month"`
-	Year      int    `json:"year"`
 }
 
 type NewUser struct {
@@ -156,7 +154,5 @@ type NewVideo struct {
 	Thumbnail   string `json:"thumbnail"`
 	Description string `json:"description"`
 	Visibility  string `json:"visibility"`
-	Day         int    `json:"day"`
-	Month       int    `json:"month"`
-	Year        int    `json:"year"`
+	Duration    int    `json:"duration"`
 }
