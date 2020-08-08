@@ -442,6 +442,7 @@ func (r *mutationResolver) CreatePlaylist(ctx context.Context, input *model.NewP
 
 func (r *mutationResolver) DeletePlaylist(ctx context.Context, id int) (bool, error) {
 	var playlist model.Playlist
+	var detail model.DetailPlaylist
 
 	err := r.DB.Model(&playlist).Where("id = ?", id).First()
 
@@ -450,7 +451,7 @@ func (r *mutationResolver) DeletePlaylist(ctx context.Context, id int) (bool, er
 	}
 
 	_, deleteErr := r.DB.Model(&playlist).Where("id = ?", id).Delete()
-
+	r.DB.Model(&detail).Where("playlist_id = ?",id).Delete()
 	if deleteErr != nil {
 		return false, errors.New("Delete playlist failed")
 	}
