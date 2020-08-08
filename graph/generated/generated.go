@@ -130,6 +130,7 @@ type ComplexityRoot struct {
 		GetCommentLike     func(childComplexity int, commentid int, typeArg string) int
 		GetNextVideo       func(childComplexity int, videoid int) int
 		GetPlaylistID      func(childComplexity int, playlistid int) int
+		GetPlaylistUser    func(childComplexity int, userid string) int
 		GetPlaylistVideo   func(childComplexity int, playlistid int) int
 		GetReplyLike       func(childComplexity int, replyid int, typeArg string) int
 		GetSubscribe       func(childComplexity int) int
@@ -238,6 +239,7 @@ type QueryResolver interface {
 	GetCategory(ctx context.Context, category string) ([]*model.Video, error)
 	Playlists(ctx context.Context) ([]*model.Playlist, error)
 	GetPlaylistID(ctx context.Context, playlistid int) ([]*model.Playlist, error)
+	GetPlaylistUser(ctx context.Context, userid string) ([]*model.Playlist, error)
 	GetPlaylistVideo(ctx context.Context, playlistid int) ([]*model.DetailPlaylist, error)
 }
 
@@ -840,6 +842,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetPlaylistID(childComplexity, args["playlistid"].(int)), true
+
+	case "Query.getPlaylistUser":
+		if e.complexity.Query.GetPlaylistUser == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getPlaylistUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetPlaylistUser(childComplexity, args["userid"].(string)), true
 
 	case "Query.getPlaylistVideo":
 		if e.complexity.Query.GetPlaylistVideo == nil {
@@ -1488,6 +1502,7 @@ type Query{
 
   playlists: [Playlist!]!
   getPlaylistId(playlistid: Int!): [Playlist!]!
+  getPlaylistUser(userid: String!): [Playlist!]!
   getPlaylistVideo(playlistid: Int!): [DetailPlaylist!]!
 }
 
@@ -2026,6 +2041,20 @@ func (ec *executionContext) field_Query_getPlaylistId_args(ctx context.Context, 
 		}
 	}
 	args["playlistid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getPlaylistUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userid"] = arg0
 	return args, nil
 }
 
@@ -5026,6 +5055,47 @@ func (ec *executionContext) _Query_getPlaylistId(ctx context.Context, field grap
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().GetPlaylistID(rctx, args["playlistid"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Playlist)
+	fc.Result = res
+	return ec.marshalNPlaylist2ᚕᚖGo_BackendᚋgraphᚋmodelᚐPlaylistᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getPlaylistUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getPlaylistUser_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetPlaylistUser(rctx, args["userid"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8508,6 +8578,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getPlaylistId(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getPlaylistUser":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getPlaylistUser(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

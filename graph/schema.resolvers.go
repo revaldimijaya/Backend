@@ -335,9 +335,9 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input *model.NewCo
 		Day:     Day,
 		Month:   Month,
 		Year:    Year,
-		Second: Second,
-		Minute: Minute,
-		Hour: Hour,
+		Second:  Second,
+		Minute:  Minute,
+		Hour:    Hour,
 	}
 
 	_, err := r.DB.Model(&comment).Insert()
@@ -369,9 +369,9 @@ func (r *mutationResolver) CreateReply(ctx context.Context, input *model.NewRepl
 		Day:       Day,
 		Month:     Month,
 		Year:      Year,
-		Second: Second,
-		Minute: Minute,
-		Hour: Hour,
+		Second:    Second,
+		Minute:    Minute,
+		Hour:      Hour,
 	}
 
 	_, err := r.DB.Model(&reply).Insert()
@@ -724,6 +724,18 @@ func (r *queryResolver) GetPlaylistID(ctx context.Context, playlistid int) ([]*m
 	var playlist []*model.Playlist
 
 	err := r.DB.Model(&playlist).Where("id = ?", playlistid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlist")
+	}
+
+	return playlist, nil
+}
+
+func (r *queryResolver) GetPlaylistUser(ctx context.Context, userid string) ([]*model.Playlist, error) {
+	var playlist []*model.Playlist
+
+	err := r.DB.Model(&playlist).Where("user_id = ?", userid).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlist")
