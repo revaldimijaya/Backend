@@ -9,6 +9,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-pg/pg/v9"
+	"strings"
 	"time"
 )
 
@@ -701,8 +703,8 @@ func (r *queryResolver) GetSubscribe(ctx context.Context) ([]*model.Subscribe, e
 
 func (r *queryResolver) GetSubscribeVideo(ctx context.Context, userid string) ([]*model.Video, error) {
 	var video []*model.Video
-
-	err := r.DB.Model(&video).Where("user_id IN ('104744471475291128004','105284714552693526276')", userid).Select()
+	s:=strings.Split(userid, ",")
+	err := r.DB.Model(&video).Where("user_id IN (?)", pg.Strings(s)).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query video")
