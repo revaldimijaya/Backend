@@ -702,7 +702,7 @@ func (r *queryResolver) GetSubscribe(ctx context.Context) ([]*model.Subscribe, e
 func (r *queryResolver) GetSubscribeVideo(ctx context.Context, userid string) ([]*model.Video, error) {
 	var video []*model.Video
 
-	err := r.DB.Model(&video).Order("user_id IN (?)",userid).Select()
+	err := r.DB.Model(&video).Order("user_id IN (?)", userid).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query video")
@@ -751,16 +751,8 @@ func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error
 	return playlist, nil
 }
 
-func (r *queryResolver) PlaylistID(ctx context.Context, playlistid int) ([]*model.Playlist, error) {
-	var playlist []*model.Playlist
-
-	err := r.DB.Model(&playlist).Where("id = ?", playlistid).Select()
-
-	if err != nil {
-		return nil, errors.New("Failed to query playlist")
-	}
-
-	return playlist, nil
+func (r *queryResolver) GetPlaylistID(ctx context.Context, playlistid int) ([]*model.Playlist, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) GetPlaylistUser(ctx context.Context, userid string) ([]*model.Playlist, error) {
@@ -807,3 +799,21 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *queryResolver) PlaylistID(ctx context.Context, playlistid int) ([]*model.Playlist, error) {
+	var playlist []*model.Playlist
+
+	err := r.DB.Model(&playlist).Where("id = ?", playlistid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlist")
+	}
+
+	return playlist, nil
+}
