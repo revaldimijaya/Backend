@@ -451,7 +451,7 @@ func (r *mutationResolver) DeletePlaylist(ctx context.Context, id int) (bool, er
 	}
 
 	_, deleteErr := r.DB.Model(&playlist).Where("id = ?", id).Delete()
-	r.DB.Model(&detail).Where("playlist_id = ?",id).Delete()
+	r.DB.Model(&detail).Where("playlist_id = ?", id).Delete()
 	if deleteErr != nil {
 		return false, errors.New("Delete playlist failed")
 	}
@@ -532,6 +532,24 @@ func (r *mutationResolver) DeleteDetailPlaylist(ctx context.Context, id int) (bo
 	}
 
 	_, deleteErr := r.DB.Model(&detail).Where("id = ?", id).Delete()
+
+	if deleteErr != nil {
+		return false, errors.New("Delete detail failed")
+	}
+
+	return true, nil
+}
+
+func (r *mutationResolver) DeleteDetailPlaylistVideo(ctx context.Context, playlistid int, videoid int) (bool, error) {
+	var detail model.DetailPlaylist
+
+	err := r.DB.Model(&detail).Where("playlist_id = ? AND video_id = ?",playlistid, videoid).First()
+
+	if err != nil {
+		return false, errors.New("detail not found!")
+	}
+
+	_, deleteErr := r.DB.Model(&detail).Where("playlist_id = ? AND video_id = ?",playlistid, videoid).Delete()
 
 	if deleteErr != nil {
 		return false, errors.New("Delete detail failed")
@@ -684,7 +702,7 @@ func (r *queryResolver) GetSubscribe(ctx context.Context) ([]*model.Subscribe, e
 func (r *queryResolver) GetSubscribeByUser(ctx context.Context, userid string) ([]*model.Subscribe, error) {
 	var subs []*model.Subscribe
 
-	r.DB.Model(&subs).Where("user_id = ?", userid).Select()
+	r.DB.Model(&subs).Where("user_id IN (?)", userid).Select()
 
 	return subs, nil
 }

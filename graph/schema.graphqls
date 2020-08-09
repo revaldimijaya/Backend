@@ -211,5 +211,6 @@ type Mutation {
 
   createDetailPlaylist(playlistid: Int!, videoid: Int!): DetailPlaylist!
   deleteDetailPlaylist(id: Int!): Boolean!
+  deleteDetailPlaylistVideo(playlistid: Int!, videoid: Int!): Boolean!
 }
 
