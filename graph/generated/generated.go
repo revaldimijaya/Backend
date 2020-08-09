@@ -125,26 +125,27 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		CheckSubscribe     func(childComplexity int, userid string, subscribeto string) int
-		Comment            func(childComplexity int, videoid int) int
-		GetCategory        func(childComplexity int, category string) int
-		GetCommentLike     func(childComplexity int, commentid int, typeArg string) int
-		GetNextVideo       func(childComplexity int, videoid int) int
-		GetPlaylistID      func(childComplexity int, playlistid int) int
-		GetPlaylistUser    func(childComplexity int, userid string) int
-		GetPlaylistVideo   func(childComplexity int, playlistid int) int
-		GetReplyLike       func(childComplexity int, replyid int, typeArg string) int
-		GetSubscribe       func(childComplexity int) int
-		GetSubscribeByUser func(childComplexity int, userid string) int
-		GetUserID          func(childComplexity int, userid string) int
-		GetVideoByUser     func(childComplexity int, userid string) int
-		GetVideoID         func(childComplexity int, videoid int) int
-		GetVideoLike       func(childComplexity int, videoid int, typeArg string) int
-		GetVideoTrending   func(childComplexity int) int
-		Playlists          func(childComplexity int) int
-		Reply              func(childComplexity int, commentid int) int
-		Users              func(childComplexity int) int
-		Videos             func(childComplexity int) int
+		CheckSubscribe             func(childComplexity int, userid string, subscribeto string) int
+		Comment                    func(childComplexity int, videoid int) int
+		GetCategory                func(childComplexity int, category string) int
+		GetCommentLike             func(childComplexity int, commentid int, typeArg string) int
+		GetNextVideo               func(childComplexity int, videoid int) int
+		GetPlaylistByPlaylistVideo func(childComplexity int, playlistid int, videoid int) int
+		GetPlaylistID              func(childComplexity int, playlistid int) int
+		GetPlaylistUser            func(childComplexity int, userid string) int
+		GetPlaylistVideo           func(childComplexity int, playlistid int) int
+		GetReplyLike               func(childComplexity int, replyid int, typeArg string) int
+		GetSubscribe               func(childComplexity int) int
+		GetSubscribeByUser         func(childComplexity int, userid string) int
+		GetUserID                  func(childComplexity int, userid string) int
+		GetVideoByUser             func(childComplexity int, userid string) int
+		GetVideoID                 func(childComplexity int, videoid int) int
+		GetVideoLike               func(childComplexity int, videoid int, typeArg string) int
+		GetVideoTrending           func(childComplexity int) int
+		Playlists                  func(childComplexity int) int
+		Reply                      func(childComplexity int, commentid int) int
+		Users                      func(childComplexity int) int
+		Videos                     func(childComplexity int) int
 	}
 
 	Reply struct {
@@ -243,6 +244,7 @@ type QueryResolver interface {
 	GetPlaylistID(ctx context.Context, playlistid int) ([]*model.Playlist, error)
 	GetPlaylistUser(ctx context.Context, userid string) ([]*model.Playlist, error)
 	GetPlaylistVideo(ctx context.Context, playlistid int) ([]*model.DetailPlaylist, error)
+	GetPlaylistByPlaylistVideo(ctx context.Context, playlistid int, videoid int) ([]*model.DetailPlaylist, error)
 }
 
 type executableSchema struct {
@@ -844,6 +846,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetNextVideo(childComplexity, args["videoid"].(int)), true
+
+	case "Query.getPlaylistByPlaylistVideo":
+		if e.complexity.Query.GetPlaylistByPlaylistVideo == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getPlaylistByPlaylistVideo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetPlaylistByPlaylistVideo(childComplexity, args["playlistid"].(int), args["videoid"].(int)), true
 
 	case "Query.getPlaylistId":
 		if e.complexity.Query.GetPlaylistID == nil {
@@ -1518,6 +1532,7 @@ type Query{
   getPlaylistId(playlistid: Int!): [Playlist!]!
   getPlaylistUser(userid: String!): [Playlist!]!
   getPlaylistVideo(playlistid: Int!): [DetailPlaylist!]!
+  getPlaylistByPlaylistVideo(playlistid: Int!, videoid: Int!): [DetailPlaylist!]!
 }
 
 
@@ -2064,6 +2079,28 @@ func (ec *executionContext) field_Query_getNextVideo_args(ctx context.Context, r
 		}
 	}
 	args["videoid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getPlaylistByPlaylistVideo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["playlistid"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["playlistid"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["videoid"]; ok {
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["videoid"] = arg1
 	return args, nil
 }
 
@@ -5215,6 +5252,47 @@ func (ec *executionContext) _Query_getPlaylistVideo(ctx context.Context, field g
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().GetPlaylistVideo(rctx, args["playlistid"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.DetailPlaylist)
+	fc.Result = res
+	return ec.marshalNDetailPlaylist2ᚕᚖGo_BackendᚋgraphᚋmodelᚐDetailPlaylistᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getPlaylistByPlaylistVideo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getPlaylistByPlaylistVideo_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetPlaylistByPlaylistVideo(rctx, args["playlistid"].(int), args["videoid"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8689,6 +8767,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getPlaylistVideo(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getPlaylistByPlaylistVideo":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getPlaylistByPlaylistVideo(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

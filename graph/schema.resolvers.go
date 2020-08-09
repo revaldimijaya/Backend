@@ -543,13 +543,13 @@ func (r *mutationResolver) DeleteDetailPlaylist(ctx context.Context, id int) (bo
 func (r *mutationResolver) DeleteDetailPlaylistVideo(ctx context.Context, playlistid int, videoid int) (bool, error) {
 	var detail model.DetailPlaylist
 
-	err := r.DB.Model(&detail).Where("playlist_id = ? AND video_id = ?",playlistid, videoid).First()
+	err := r.DB.Model(&detail).Where("playlist_id = ? AND video_id = ?", playlistid, videoid).First()
 
 	if err != nil {
 		return false, errors.New("detail not found!")
 	}
 
-	_, deleteErr := r.DB.Model(&detail).Where("playlist_id = ? AND video_id = ?",playlistid, videoid).Delete()
+	_, deleteErr := r.DB.Model(&detail).Where("playlist_id = ? AND video_id = ?", playlistid, videoid).Delete()
 
 	if deleteErr != nil {
 		return false, errors.New("Delete detail failed")
@@ -767,6 +767,18 @@ func (r *queryResolver) GetPlaylistVideo(ctx context.Context, playlistid int) ([
 	var playlist []*model.DetailPlaylist
 
 	err := r.DB.Model(&playlist).Where("playlist_id = ?", playlistid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlist")
+	}
+
+	return playlist, nil
+}
+
+func (r *queryResolver) GetPlaylistByPlaylistVideo(ctx context.Context, playlistid int, videoid int) ([]*model.DetailPlaylist, error) {
+	var playlist []*model.DetailPlaylist
+
+	err := r.DB.Model(&playlist).Where("playlist_id = ? AND video_id = ?", playlistid, videoid).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlist")

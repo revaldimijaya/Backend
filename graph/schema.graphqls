@@ -179,6 +179,7 @@ type Query{
   getPlaylistId(playlistid: Int!): [Playlist!]!
   getPlaylistUser(userid: String!): [Playlist!]!
   getPlaylistVideo(playlistid: Int!): [DetailPlaylist!]!
+  getPlaylistByPlaylistVideo(playlistid: Int!, videoid: Int!): [DetailPlaylist!]!
 }
 
 
