@@ -702,7 +702,7 @@ func (r *queryResolver) GetSubscribe(ctx context.Context) ([]*model.Subscribe, e
 func (r *queryResolver) GetSubscribeVideo(ctx context.Context, userid string) ([]*model.Video, error) {
 	var video []*model.Video
 
-	err := r.DB.Model(&video).Order("user_id IN (?)", userid).Select()
+	err := r.DB.Model(&video).Where("user_id IN (?)", userid).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query video")
