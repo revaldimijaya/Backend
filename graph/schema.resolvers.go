@@ -699,10 +699,22 @@ func (r *queryResolver) GetSubscribe(ctx context.Context) ([]*model.Subscribe, e
 	return subs, nil
 }
 
+func (r *queryResolver) GetSubscribeVideo(ctx context.Context, userid string) ([]*model.Video, error) {
+	var video []*model.Video
+
+	err := r.DB.Model(&video).Order("user_id IN (?)",userid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query video")
+	}
+
+	return video, nil
+}
+
 func (r *queryResolver) GetSubscribeByUser(ctx context.Context, userid string) ([]*model.Subscribe, error) {
 	var subs []*model.Subscribe
 
-	r.DB.Model(&subs).Where("user_id IN (?)", userid).Select()
+	r.DB.Model(&subs).Where("user_id = ?", userid).Select()
 
 	return subs, nil
 }
@@ -739,7 +751,7 @@ func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error
 	return playlist, nil
 }
 
-func (r *queryResolver) GetPlaylistID(ctx context.Context, playlistid int) ([]*model.Playlist, error) {
+func (r *queryResolver) PlaylistID(ctx context.Context, playlistid int) ([]*model.Playlist, error) {
 	var playlist []*model.Playlist
 
 	err := r.DB.Model(&playlist).Where("id = ?", playlistid).Select()

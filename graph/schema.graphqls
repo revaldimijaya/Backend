@@ -170,6 +170,7 @@ type Query{
   getReplyLike(replyid: Int!, type: String!): [LikeReply!]!
 
   getSubscribe :[Subscribe!]!
+  getSubscribeVideo(userid: String!): [Video!]!
   getSubscribeByUser(userid: String!): [Subscribe!]!
   checkSubscribe(userid: String!, subscribeto: String!): Subscribe!
 

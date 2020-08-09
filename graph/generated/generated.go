@@ -137,6 +137,7 @@ type ComplexityRoot struct {
 		GetReplyLike               func(childComplexity int, replyid int, typeArg string) int
 		GetSubscribe               func(childComplexity int) int
 		GetSubscribeByUser         func(childComplexity int, userid string) int
+		GetSubscribeVideo          func(childComplexity int, userid string) int
 		GetUserID                  func(childComplexity int, userid string) int
 		GetVideoByUser             func(childComplexity int, userid string) int
 		GetVideoID                 func(childComplexity int, videoid int) int
@@ -237,6 +238,7 @@ type QueryResolver interface {
 	GetCommentLike(ctx context.Context, commentid int, typeArg string) ([]*model.LikeComment, error)
 	GetReplyLike(ctx context.Context, replyid int, typeArg string) ([]*model.LikeReply, error)
 	GetSubscribe(ctx context.Context) ([]*model.Subscribe, error)
+	GetSubscribeVideo(ctx context.Context, userid string) ([]*model.Video, error)
 	GetSubscribeByUser(ctx context.Context, userid string) ([]*model.Subscribe, error)
 	CheckSubscribe(ctx context.Context, userid string, subscribeto string) (*model.Subscribe, error)
 	GetCategory(ctx context.Context, category string) ([]*model.Video, error)
@@ -926,6 +928,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetSubscribeByUser(childComplexity, args["userid"].(string)), true
 
+	case "Query.getSubscribeVideo":
+		if e.complexity.Query.GetSubscribeVideo == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSubscribeVideo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSubscribeVideo(childComplexity, args["userid"].(string)), true
+
 	case "Query.getUserId":
 		if e.complexity.Query.GetUserID == nil {
 			break
@@ -1523,6 +1537,7 @@ type Query{
   getReplyLike(replyid: Int!, type: String!): [LikeReply!]!
 
   getSubscribe :[Subscribe!]!
+  getSubscribeVideo(userid: String!): [Video!]!
   getSubscribeByUser(userid: String!): [Subscribe!]!
   checkSubscribe(userid: String!, subscribeto: String!): Subscribe!
 
@@ -2169,6 +2184,20 @@ func (ec *executionContext) field_Query_getReplyLike_args(ctx context.Context, r
 }
 
 func (ec *executionContext) field_Query_getSubscribeByUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getSubscribeVideo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -4986,6 +5015,47 @@ func (ec *executionContext) _Query_getSubscribe(ctx context.Context, field graph
 	res := resTmp.([]*model.Subscribe)
 	fc.Result = res
 	return ec.marshalNSubscribe2ᚕᚖGo_BackendᚋgraphᚋmodelᚐSubscribeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getSubscribeVideo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getSubscribeVideo_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSubscribeVideo(rctx, args["userid"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Video)
+	fc.Result = res
+	return ec.marshalNVideo2ᚕᚖGo_BackendᚋgraphᚋmodelᚐVideoᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getSubscribeByUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -8669,6 +8739,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getSubscribe(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getSubscribeVideo":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSubscribeVideo(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
