@@ -660,7 +660,7 @@ func (r *queryResolver) GetNextVideo(ctx context.Context, videoid int) ([]*model
 func (r *queryResolver) GetVideoTrending(ctx context.Context) ([]*model.Video, error) {
 	var video []*model.Video
 
-	err := r.DB.Model(&video).Order("watch DESC").Limit(20).Select()
+	err := r.DB.Model(&video).Order("watch DESC").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query users")
