@@ -754,7 +754,15 @@ func (r *queryResolver) Playlists(ctx context.Context) ([]*model.Playlist, error
 }
 
 func (r *queryResolver) GetPlaylistID(ctx context.Context, playlistid int) ([]*model.Playlist, error) {
-	panic(fmt.Errorf("not implemented"))
+	var playlist []*model.Playlist
+
+	err := r.DB.Model(&playlist).Where("id = ?", playlistid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query playlist")
+	}
+
+	return playlist, nil
 }
 
 func (r *queryResolver) GetPlaylistUser(ctx context.Context, userid string) ([]*model.Playlist, error) {
