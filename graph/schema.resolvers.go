@@ -566,7 +566,7 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost)
 		UserID:      input.UserID,
 		Description: input.Description,
 		Picture:     input.Picture,
-		Date:        time.Now().String(),
+		Date:        "asd",
 	}
 
 	fmt.Println(post)
