@@ -31,6 +31,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser)
 		CreatedAt:   dateFormat,
 		Views:       0,
 		Description: input.Description,
+		Header: input.Header,
 	}
 
 	_, err := r.DB.Model(&user).Insert()
@@ -43,7 +44,20 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser)
 }
 
 func (r *mutationResolver) ViewUser(ctx context.Context, userid string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	var user model.User
+
+	err := r.DB.Model(&user).Where("id = ?", userid).First()
+
+	if err != nil {
+		return nil, errors.New("user not found!")
+	}
+	_, updateErr := r.DB.Model(&user).Where("id = ?", userid).Update()
+
+	if updateErr != nil {
+		return nil, errors.New("Update user failed")
+	}
+
+	return &user, nil
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input *model.NewUser) (*model.User, error) {
@@ -58,11 +72,13 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input *mod
 	user.Name = input.Name
 	user.Membership = input.Membership
 	user.Photo = input.Photo
+	user.Description = input.Description
+	user.Header = input.Header
 
 	_, updateErr := r.DB.Model(&user).Where("id = ?", id).Update()
 
 	if updateErr != nil {
-		return nil, errors.New("Update computer failed")
+		return nil, errors.New("Update user failed")
 	}
 
 	return &user, nil
