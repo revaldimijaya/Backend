@@ -570,6 +570,8 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost)
 		Date:        input.Date,
 	}
 
+	fmt.Println(post)
+
 	_, err := r.DB.Model(&post).Insert()
 
 	if err != nil {
