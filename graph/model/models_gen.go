@@ -66,7 +66,7 @@ type Playlist struct {
 	Views       int    `json:"views"`
 }
 
-type Post struct {
+type Posting struct {
 	ID          string `json:"id"`
 	UserID      string `json:"user_id"`
 	Description string `json:"description"`

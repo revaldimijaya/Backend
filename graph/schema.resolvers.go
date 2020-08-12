@@ -561,27 +561,27 @@ func (r *mutationResolver) DeleteDetailPlaylistVideo(ctx context.Context, playli
 	return true, nil
 }
 
-func (r *mutationResolver) CreatePost(ctx context.Context, userid string, description string, picture string) (*model.Post, error) {
-	post := model.Post{
+func (r *mutationResolver) CreatePost(ctx context.Context, userid string, description string, picture string) (*model.Posting, error) {
+	posting := model.Posting{
 		UserID:      userid,
 		Description: description,
 		Picture:     picture,
 		CreatedAt:   "2020",
 	}
 
-	fmt.Println(post)
+	fmt.Println(posting)
 
-	_, err := r.DB.Model(&post).Insert()
+	_, err := r.DB.Model(&posting).Insert()
 
 	if err != nil {
 		return nil, errors.New("Insert new post failed")
 	}
 
-	return &post, nil
+	return &posting, nil
 }
 
 func (r *mutationResolver) PostLike(ctx context.Context, id int, userid string, typeArg string) (bool, error) {
-	var post model.Post
+	var post model.Posting
 
 	err := r.DB.Model(&post).Where("id = ?", id).First()
 
@@ -870,8 +870,8 @@ func (r *queryResolver) GetPlaylistByPlaylistVideo(ctx context.Context, playlist
 	return playlist, nil
 }
 
-func (r *queryResolver) Posts(ctx context.Context, userid string) ([]*model.Post, error) {
-	var post []*model.Post
+func (r *queryResolver) Posts(ctx context.Context, userid string) ([]*model.Posting, error) {
+	var post []*model.Posting
 
 	err := r.DB.Model(&post).Where("user_id = ?", userid).Select()
 

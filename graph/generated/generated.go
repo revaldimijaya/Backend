@@ -133,7 +133,7 @@ type ComplexityRoot struct {
 		Year        func(childComplexity int) int
 	}
 
-	Post struct {
+	Posting struct {
 		CreatedAt   func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
@@ -242,7 +242,7 @@ type MutationResolver interface {
 	CreateDetailPlaylist(ctx context.Context, playlistid int, videoid int) (*model.DetailPlaylist, error)
 	DeleteDetailPlaylist(ctx context.Context, id int) (bool, error)
 	DeleteDetailPlaylistVideo(ctx context.Context, playlistid int, videoid int) (bool, error)
-	CreatePost(ctx context.Context, userid string, description string, picture string) (*model.Post, error)
+	CreatePost(ctx context.Context, userid string, description string, picture string) (*model.Posting, error)
 	PostLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
 }
 type QueryResolver interface {
@@ -268,7 +268,7 @@ type QueryResolver interface {
 	GetPlaylistUser(ctx context.Context, userid string) ([]*model.Playlist, error)
 	GetPlaylistVideo(ctx context.Context, playlistid int) ([]*model.DetailPlaylist, error)
 	GetPlaylistByPlaylistVideo(ctx context.Context, playlistid int, videoid int) ([]*model.DetailPlaylist, error)
-	Posts(ctx context.Context, userid string) ([]*model.Post, error)
+	Posts(ctx context.Context, userid string) ([]*model.Posting, error)
 	GetPostLike(ctx context.Context, postid int, typeArg string) ([]*model.LikePost, error)
 }
 
@@ -864,40 +864,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Playlist.Year(childComplexity), true
 
-	case "Post.createdAt":
-		if e.complexity.Post.CreatedAt == nil {
+	case "Posting.createdAt":
+		if e.complexity.Posting.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.Post.CreatedAt(childComplexity), true
+		return e.complexity.Posting.CreatedAt(childComplexity), true
 
-	case "Post.description":
-		if e.complexity.Post.Description == nil {
+	case "Posting.description":
+		if e.complexity.Posting.Description == nil {
 			break
 		}
 
-		return e.complexity.Post.Description(childComplexity), true
+		return e.complexity.Posting.Description(childComplexity), true
 
-	case "Post.id":
-		if e.complexity.Post.ID == nil {
+	case "Posting.id":
+		if e.complexity.Posting.ID == nil {
 			break
 		}
 
-		return e.complexity.Post.ID(childComplexity), true
+		return e.complexity.Posting.ID(childComplexity), true
 
-	case "Post.picture":
-		if e.complexity.Post.Picture == nil {
+	case "Posting.picture":
+		if e.complexity.Posting.Picture == nil {
 			break
 		}
 
-		return e.complexity.Post.Picture(childComplexity), true
+		return e.complexity.Posting.Picture(childComplexity), true
 
-	case "Post.user_id":
-		if e.complexity.Post.UserID == nil {
+	case "Posting.user_id":
+		if e.complexity.Posting.UserID == nil {
 			break
 		}
 
-		return e.complexity.Post.UserID(childComplexity), true
+		return e.complexity.Posting.UserID(childComplexity), true
 
 	case "Query.checkSubscribe":
 		if e.complexity.Query.CheckSubscribe == nil {
@@ -1654,7 +1654,7 @@ input newComment {
   dislike: Int!
 }
 
-type Post {
+type Posting {
   id: ID!
   user_id: String!
   description: String!
@@ -1698,7 +1698,7 @@ type Query{
   getPlaylistVideo(playlistid: Int!): [DetailPlaylist!]!
   getPlaylistByPlaylistVideo(playlistid: Int!, videoid: Int!): [DetailPlaylist!]!
 
-  posts(userid: String!): [Post!]!
+  posts(userid: String!): [Posting!]!
   getPostLike(postid: Int!, type: String!): [LikePost!]!
 
 }
@@ -1735,7 +1735,7 @@ type Mutation {
   deleteDetailPlaylist(id: Int!): Boolean!
   deleteDetailPlaylistVideo(playlistid: Int!, videoid: Int!): Boolean!
 
-  createPost(userid: String!, description: String!, picture: String!): Post!
+  createPost(userid: String!, description: String!, picture: String!): Posting!
   postLike(id: Int!, userid: String!, type: String!): Boolean!
 
 }
@@ -4529,9 +4529,9 @@ func (ec *executionContext) _Mutation_createPost(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Post)
+	res := resTmp.(*model.Posting)
 	fc.Result = res
-	return ec.marshalNPost2ᚖGo_BackendᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
+	return ec.marshalNPosting2ᚖGo_BackendᚋgraphᚋmodelᚐPosting(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_postLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4983,7 +4983,7 @@ func (ec *executionContext) _Playlist_views(ctx context.Context, field graphql.C
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Post_id(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+func (ec *executionContext) _Posting_id(ctx context.Context, field graphql.CollectedField, obj *model.Posting) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -4991,7 +4991,7 @@ func (ec *executionContext) _Post_id(ctx context.Context, field graphql.Collecte
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Post",
+		Object:   "Posting",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -5017,7 +5017,7 @@ func (ec *executionContext) _Post_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Post_user_id(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+func (ec *executionContext) _Posting_user_id(ctx context.Context, field graphql.CollectedField, obj *model.Posting) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5025,7 +5025,7 @@ func (ec *executionContext) _Post_user_id(ctx context.Context, field graphql.Col
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Post",
+		Object:   "Posting",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -5051,7 +5051,7 @@ func (ec *executionContext) _Post_user_id(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Post_description(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+func (ec *executionContext) _Posting_description(ctx context.Context, field graphql.CollectedField, obj *model.Posting) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5059,7 +5059,7 @@ func (ec *executionContext) _Post_description(ctx context.Context, field graphql
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Post",
+		Object:   "Posting",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -5085,7 +5085,7 @@ func (ec *executionContext) _Post_description(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Post_picture(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+func (ec *executionContext) _Posting_picture(ctx context.Context, field graphql.CollectedField, obj *model.Posting) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5093,7 +5093,7 @@ func (ec *executionContext) _Post_picture(ctx context.Context, field graphql.Col
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Post",
+		Object:   "Posting",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -5119,7 +5119,7 @@ func (ec *executionContext) _Post_picture(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Post_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+func (ec *executionContext) _Posting_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Posting) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5127,7 +5127,7 @@ func (ec *executionContext) _Post_createdAt(ctx context.Context, field graphql.C
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Post",
+		Object:   "Posting",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -6056,9 +6056,9 @@ func (ec *executionContext) _Query_posts(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Post)
+	res := resTmp.([]*model.Posting)
 	fc.Result = res
-	return ec.marshalNPost2ᚕᚖGo_BackendᚋgraphᚋmodelᚐPostᚄ(ctx, field.Selections, res)
+	return ec.marshalNPosting2ᚕᚖGo_BackendᚋgraphᚋmodelᚐPostingᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getPostLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -9322,39 +9322,39 @@ func (ec *executionContext) _Playlist(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var postImplementors = []string{"Post"}
+var postingImplementors = []string{"Posting"}
 
-func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj *model.Post) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, postImplementors)
+func (ec *executionContext) _Posting(ctx context.Context, sel ast.SelectionSet, obj *model.Posting) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, postingImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Post")
+			out.Values[i] = graphql.MarshalString("Posting")
 		case "id":
-			out.Values[i] = ec._Post_id(ctx, field, obj)
+			out.Values[i] = ec._Posting_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "user_id":
-			out.Values[i] = ec._Post_user_id(ctx, field, obj)
+			out.Values[i] = ec._Posting_user_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "description":
-			out.Values[i] = ec._Post_description(ctx, field, obj)
+			out.Values[i] = ec._Posting_description(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "picture":
-			out.Values[i] = ec._Post_picture(ctx, field, obj)
+			out.Values[i] = ec._Posting_picture(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "createdAt":
-			out.Values[i] = ec._Post_createdAt(ctx, field, obj)
+			out.Values[i] = ec._Posting_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -10662,11 +10662,11 @@ func (ec *executionContext) marshalNPlaylist2ᚖGo_BackendᚋgraphᚋmodelᚐPla
 	return ec._Playlist(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPost2Go_BackendᚋgraphᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v model.Post) graphql.Marshaler {
-	return ec._Post(ctx, sel, &v)
+func (ec *executionContext) marshalNPosting2Go_BackendᚋgraphᚋmodelᚐPosting(ctx context.Context, sel ast.SelectionSet, v model.Posting) graphql.Marshaler {
+	return ec._Posting(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNPost2ᚕᚖGo_BackendᚋgraphᚋmodelᚐPostᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Post) graphql.Marshaler {
+func (ec *executionContext) marshalNPosting2ᚕᚖGo_BackendᚋgraphᚋmodelᚐPostingᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Posting) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -10690,7 +10690,7 @@ func (ec *executionContext) marshalNPost2ᚕᚖGo_BackendᚋgraphᚋmodelᚐPost
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNPost2ᚖGo_BackendᚋgraphᚋmodelᚐPost(ctx, sel, v[i])
+			ret[i] = ec.marshalNPosting2ᚖGo_BackendᚋgraphᚋmodelᚐPosting(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10703,14 +10703,14 @@ func (ec *executionContext) marshalNPost2ᚕᚖGo_BackendᚋgraphᚋmodelᚐPost
 	return ret
 }
 
-func (ec *executionContext) marshalNPost2ᚖGo_BackendᚋgraphᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
+func (ec *executionContext) marshalNPosting2ᚖGo_BackendᚋgraphᚋmodelᚐPosting(ctx context.Context, sel ast.SelectionSet, v *model.Posting) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._Post(ctx, sel, v)
+	return ec._Posting(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNReply2Go_BackendᚋgraphᚋmodelᚐReply(ctx context.Context, sel ast.SelectionSet, v model.Reply) graphql.Marshaler {
