@@ -141,13 +141,6 @@ type NewPlaylist struct {
 	Views       int    `json:"views"`
 }
 
-type NewPost struct {
-	UserID      string `json:"user_id"`
-	Description string `json:"description"`
-	Picture     string `json:"picture"`
-	CreatedAt   string `json:"createdAt"`
-}
-
 type NewReply struct {
 	UserID    string `json:"user_id"`
 	CommentID int    `json:"comment_id"`

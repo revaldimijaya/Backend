@@ -161,13 +161,6 @@ type Post {
   createdAt: String!
 }
 
-input newPost {
-  user_id: String!
-  description: String!
-  picture: String!
-  createdAt: String!
-}
-
 type LikePost {
   id: ID!
   user_id: String!
@@ -241,7 +234,7 @@ type Mutation {
   deleteDetailPlaylist(id: Int!): Boolean!
   deleteDetailPlaylistVideo(playlistid: Int!, videoid: Int!): Boolean!
 
-  createPost(input: newPost): Post!
+  createPost(userid: String!, description: String!, picture: String!): Post!
   postLike(id: Int!, userid: String!, type: String!): Boolean!
 
 }

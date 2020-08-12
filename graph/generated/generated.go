@@ -97,7 +97,7 @@ type ComplexityRoot struct {
 		CreateComment             func(childComplexity int, input *model.NewComment) int
 		CreateDetailPlaylist      func(childComplexity int, playlistid int, videoid int) int
 		CreatePlaylist            func(childComplexity int, input *model.NewPlaylist) int
-		CreatePost                func(childComplexity int, input *model.NewPost) int
+		CreatePost                func(childComplexity int, userid string, description string, picture string) int
 		CreateReply               func(childComplexity int, input *model.NewReply) int
 		CreateSubscribe           func(childComplexity int, userid string, subscribeto string) int
 		CreateUser                func(childComplexity int, input *model.NewUser) int
@@ -242,7 +242,7 @@ type MutationResolver interface {
 	CreateDetailPlaylist(ctx context.Context, playlistid int, videoid int) (*model.DetailPlaylist, error)
 	DeleteDetailPlaylist(ctx context.Context, id int) (bool, error)
 	DeleteDetailPlaylistVideo(ctx context.Context, playlistid int, videoid int) (bool, error)
-	CreatePost(ctx context.Context, input *model.NewPost) (*model.Post, error)
+	CreatePost(ctx context.Context, userid string, description string, picture string) (*model.Post, error)
 	PostLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
 }
 type QueryResolver interface {
@@ -562,7 +562,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePost(childComplexity, args["input"].(*model.NewPost)), true
+		return e.complexity.Mutation.CreatePost(childComplexity, args["userid"].(string), args["description"].(string), args["picture"].(string)), true
 
 	case "Mutation.createReply":
 		if e.complexity.Mutation.CreateReply == nil {
@@ -1662,13 +1662,6 @@ type Post {
   createdAt: String!
 }
 
-input newPost {
-  user_id: String!
-  description: String!
-  picture: String!
-  createdAt: String!
-}
-
 type LikePost {
   id: ID!
   user_id: String!
@@ -1742,7 +1735,7 @@ type Mutation {
   deleteDetailPlaylist(id: Int!): Boolean!
   deleteDetailPlaylistVideo(playlistid: Int!, videoid: Int!): Boolean!
 
-  createPost(input: newPost): Post!
+  createPost(userid: String!, description: String!, picture: String!): Post!
   postLike(id: Int!, userid: String!, type: String!): Boolean!
 
 }
@@ -1838,14 +1831,30 @@ func (ec *executionContext) field_Mutation_createPlaylist_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_createPost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.NewPost
-	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalOnewPost2ᚖGo_BackendᚋgraphᚋmodelᚐNewPost(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
+	args["userid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["description"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["description"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["picture"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["picture"] = arg2
 	return args, nil
 }
 
@@ -4508,7 +4517,7 @@ func (ec *executionContext) _Mutation_createPost(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePost(rctx, args["input"].(*model.NewPost))
+		return ec.resolvers.Mutation().CreatePost(rctx, args["userid"].(string), args["description"].(string), args["picture"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8627,42 +8636,6 @@ func (ec *executionContext) unmarshalInputnewPlaylist(ctx context.Context, obj i
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputnewPost(ctx context.Context, obj interface{}) (model.NewPost, error) {
-	var it model.NewPost
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "user_id":
-			var err error
-			it.UserID, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "description":
-			var err error
-			it.Description, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "picture":
-			var err error
-			it.Picture, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "createdAt":
-			var err error
-			it.CreatedAt, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputnewReply(ctx context.Context, obj interface{}) (model.NewReply, error) {
 	var it model.NewReply
 	var asMap = obj.(map[string]interface{})
@@ -11433,18 +11406,6 @@ func (ec *executionContext) unmarshalOnewPlaylist2ᚖGo_Backendᚋgraphᚋmodel�
 		return nil, nil
 	}
 	res, err := ec.unmarshalOnewPlaylist2Go_BackendᚋgraphᚋmodelᚐNewPlaylist(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) unmarshalOnewPost2Go_BackendᚋgraphᚋmodelᚐNewPost(ctx context.Context, v interface{}) (model.NewPost, error) {
-	return ec.unmarshalInputnewPost(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOnewPost2ᚖGo_BackendᚋgraphᚋmodelᚐNewPost(ctx context.Context, v interface{}) (*model.NewPost, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOnewPost2Go_BackendᚋgraphᚋmodelᚐNewPost(ctx, v)
 	return &res, err
 }
 

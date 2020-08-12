@@ -561,12 +561,12 @@ func (r *mutationResolver) DeleteDetailPlaylistVideo(ctx context.Context, playli
 	return true, nil
 }
 
-func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost) (*model.Post, error) {
+func (r *mutationResolver) CreatePost(ctx context.Context, userid string, description string, picture string) (*model.Post, error) {
 	post := model.Post{
-		UserID:      input.UserID,
-		Description: input.Description,
-		Picture:     input.Picture,
-		CreatedAt:        "asd",
+		UserID:      userid,
+		Description: description,
+		Picture:     picture,
+		CreatedAt:   "2020",
 	}
 
 	fmt.Println(post)
