@@ -562,11 +562,12 @@ func (r *mutationResolver) DeleteDetailPlaylistVideo(ctx context.Context, playli
 }
 
 func (r *mutationResolver) CreatePosting(ctx context.Context, userID string, description string, picture string) (*model.Posting, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
 	posting := model.Posting{
 		UserID:      userID,
 		Description: description,
 		Picture:     picture,
-		CreatedAt:   time.Now().String(),
+		CreatedAt:   time.Now().In(location).String(),
 	}
 
 	_, err := r.DB.Model(&posting).Insert()
