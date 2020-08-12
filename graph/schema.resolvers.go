@@ -566,7 +566,7 @@ func (r *mutationResolver) CreatePost(ctx context.Context, userid string, descri
 		UserID:      userid,
 		Description: description,
 		Picture:     picture,
-		CreatedAt:   "2020",
+		CreatedAt:   time.Now().String(),
 	}
 
 	fmt.Println(posting)
@@ -905,14 +905,3 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *queryResolver) PlaylistID(ctx context.Context, playlistid int) ([]*model.Playlist, error) {
-	var playlist []*model.Playlist
-
-	err := r.DB.Model(&playlist).Where("id = ?", playlistid).Select()
-
-	if err != nil {
-		return nil, errors.New("Failed to query playlist")
-	}
-
-	return playlist, nil
-}
