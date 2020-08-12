@@ -158,13 +158,14 @@ type Post {
   user_id: String!
   description: String!
   picture: String!
-  date: String!
+  createdAt: String!
 }
 
 input newPost {
   user_id: String!
   description: String!
   picture: String!
+  createdAt: String!
 }
 
 type LikePost {

@@ -71,7 +71,7 @@ type Post struct {
 	UserID      string `json:"user_id"`
 	Description string `json:"description"`
 	Picture     string `json:"picture"`
-	Date        string `json:"date"`
+	CreatedAt   string `json:"createdAt"`
 }
 
 type Reply struct {
@@ -145,6 +145,7 @@ type NewPost struct {
 	UserID      string `json:"user_id"`
 	Description string `json:"description"`
 	Picture     string `json:"picture"`
+	CreatedAt   string `json:"createdAt"`
 }
 
 type NewReply struct {

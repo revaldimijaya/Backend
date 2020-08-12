@@ -134,7 +134,7 @@ type ComplexityRoot struct {
 	}
 
 	Post struct {
-		Date        func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Picture     func(childComplexity int) int
@@ -864,12 +864,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Playlist.Year(childComplexity), true
 
-	case "Post.date":
-		if e.complexity.Post.Date == nil {
+	case "Post.createdAt":
+		if e.complexity.Post.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.Post.Date(childComplexity), true
+		return e.complexity.Post.CreatedAt(childComplexity), true
 
 	case "Post.description":
 		if e.complexity.Post.Description == nil {
@@ -1659,13 +1659,14 @@ type Post {
   user_id: String!
   description: String!
   picture: String!
-  date: String!
+  createdAt: String!
 }
 
 input newPost {
   user_id: String!
   description: String!
   picture: String!
+  createdAt: String!
 }
 
 type LikePost {
@@ -5109,7 +5110,7 @@ func (ec *executionContext) _Post_picture(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Post_date(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+func (ec *executionContext) _Post_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5126,7 +5127,7 @@ func (ec *executionContext) _Post_date(ctx context.Context, field graphql.Collec
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Date, nil
+		return obj.CreatedAt, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8650,6 +8651,12 @@ func (ec *executionContext) unmarshalInputnewPost(ctx context.Context, obj inter
 			if err != nil {
 				return it, err
 			}
+		case "createdAt":
+			var err error
+			it.CreatedAt, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -9373,8 +9380,8 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "date":
-			out.Values[i] = ec._Post_date(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._Post_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

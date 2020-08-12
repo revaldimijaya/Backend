@@ -566,12 +566,12 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost)
 		UserID:      input.UserID,
 		Description: input.Description,
 		Picture:     input.Picture,
-		Date:        "asd",
+		CreatedAt:        "asd",
 	}
 
 	fmt.Println(post)
 
-	_, err := r.DB.Query(&post,"INSERT INTO user_id,description,picture,date posts VALUES (?,?,?,?)",input.UserID, input.Description, input.Picture, "test")
+	_, err := r.DB.Model(&post).Insert()
 
 	if err != nil {
 		return nil, errors.New("Insert new post failed")
