@@ -85,6 +85,14 @@ type Subscribe {
   subscribe_to: String!
 }
 
+type Posting {
+  id: ID!
+  user_id: String!
+  description: String!
+  picture: String!
+  created_at: String!
+}
+
 input newReply {
   user_id: String!
   comment_id: Int!
@@ -153,21 +161,6 @@ input newComment {
   dislike: Int!
 }
 
-type Posting {
-  id: ID!
-  user_id: String!
-  description: String!
-  picture: String!
-  createdAt: String!
-}
-
-type LikePost {
-  id: ID!
-  user_id: String!
-  post_id: Int!
-  type: String!
-}
-
 type Query{
   users: [User!]!
   videos: [Video!]!
@@ -197,8 +190,7 @@ type Query{
   getPlaylistVideo(playlistid: Int!): [DetailPlaylist!]!
   getPlaylistByPlaylistVideo(playlistid: Int!, videoid: Int!): [DetailPlaylist!]!
 
-  posts(userid: String!): [Posting!]!
-  getPostLike(postid: Int!, type: String!): [LikePost!]!
+  getPosting(userid: String!): [Posting!]!
 
 }
 
@@ -234,8 +226,6 @@ type Mutation {
   deleteDetailPlaylist(id: Int!): Boolean!
   deleteDetailPlaylistVideo(playlistid: Int!, videoid: Int!): Boolean!
 
-  createPost(userid: String!, description: String!, picture: String!): Posting!
-  postLike(id: Int!, userid: String!, type: String!): Boolean!
-
+  createPosting(user_id: String!, description: String!, picture: String!): Posting!
 }
 

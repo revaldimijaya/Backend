@@ -561,72 +561,21 @@ func (r *mutationResolver) DeleteDetailPlaylistVideo(ctx context.Context, playli
 	return true, nil
 }
 
-func (r *mutationResolver) CreatePost(ctx context.Context, userid string, description string, picture string) (*model.Posting, error) {
+func (r *mutationResolver) CreatePosting(ctx context.Context, userID string, description string, picture string) (*model.Posting, error) {
 	posting := model.Posting{
-		UserID:      userid,
+		UserID:      userID,
 		Description: description,
 		Picture:     picture,
 		CreatedAt:   time.Now().String(),
 	}
 
-	fmt.Println(posting)
-
 	_, err := r.DB.Model(&posting).Insert()
 
 	if err != nil {
-		return nil, errors.New("Insert new post failed")
+		return nil, errors.New("Insert new posting failed")
 	}
 
 	return &posting, nil
-}
-
-func (r *mutationResolver) PostLike(ctx context.Context, id int, userid string, typeArg string) (bool, error) {
-	var post model.Posting
-
-	err := r.DB.Model(&post).Where("id = ?", id).First()
-
-	if err != nil {
-		return false, errors.New("post not found!")
-	}
-
-	var like model.LikePost
-
-	err_like := r.DB.Model(&like).Where("post_id = ? AND user_id = ?", id, userid).First()
-
-	if err_like != nil {
-
-		insert := model.LikePost{
-			UserID: userid,
-			PostID: id,
-			Type:   typeArg,
-		}
-		_, err_insert := r.DB.Model(&insert).Insert()
-
-		if err_insert != nil {
-			return false, errors.New("insert video like failed")
-		}
-
-		return true, nil
-	}
-
-	diff_like := r.DB.Model(&like).Where("post_id = ? AND user_id = ? AND type = ?", id, userid, "like").First()
-
-	if diff_like == nil && typeArg == "like" {
-		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
-
-	} else if diff_like == nil && typeArg == "dislike" {
-		like.Type = "dislike"
-		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
-
-	} else if diff_like != nil && typeArg == "dislike" {
-		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
-
-	} else if diff_like != nil && typeArg == "like" {
-		like.Type = "like"
-		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
-	}
-
-	return true, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
@@ -870,24 +819,16 @@ func (r *queryResolver) GetPlaylistByPlaylistVideo(ctx context.Context, playlist
 	return playlist, nil
 }
 
-func (r *queryResolver) Posts(ctx context.Context, userid string) ([]*model.Posting, error) {
-	var post []*model.Posting
+func (r *queryResolver) GetPosting(ctx context.Context, userid string) ([]*model.Posting, error) {
+	var posting []*model.Posting
 
-	err := r.DB.Model(&post).Where("user_id = ?", userid).Select()
+	err := r.DB.Model(&posting).Where("user_id = ?",userid).Select()
 
 	if err != nil {
-		return nil, errors.New("Failed to query post")
+		return nil, errors.New("Failed to query posting")
 	}
 
-	return post, nil
-}
-
-func (r *queryResolver) GetPostLike(ctx context.Context, postid int, typeArg string) ([]*model.LikePost, error) {
-	var like []*model.LikePost
-
-	r.DB.Model(&like).Where("video_id = ? AND type = ?", postid, typeArg).Select()
-
-	return like, nil
+	return posting, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -898,10 +839,3 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.

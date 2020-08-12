@@ -30,13 +30,6 @@ type LikeComment struct {
 	Type      string `json:"type"`
 }
 
-type LikePost struct {
-	ID     string `json:"id"`
-	UserID string `json:"user_id"`
-	PostID int    `json:"post_id"`
-	Type   string `json:"type"`
-}
-
 type LikeReply struct {
 	ID      string `json:"id"`
 	UserID  string `json:"user_id"`
@@ -71,7 +64,7 @@ type Posting struct {
 	UserID      string `json:"user_id"`
 	Description string `json:"description"`
 	Picture     string `json:"picture"`
-	CreatedAt   string `json:"createdAt"`
+	CreatedAt   string `json:"created_at"`
 }
 
 type Reply struct {
