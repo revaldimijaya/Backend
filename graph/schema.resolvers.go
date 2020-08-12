@@ -678,7 +678,7 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 func (r *queryResolver) Videos(ctx context.Context) ([]*model.Video, error) {
 	var video []*model.Video
 
-	err := r.DB.Model(&video).Order("id").Select()
+	err := r.DB.Model(&video).Order("id").Where("visibility LIKE ?","public").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query users")
