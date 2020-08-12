@@ -93,6 +93,13 @@ type Posting {
   created_at: String!
 }
 
+type LikePosting {
+  id: ID!
+  posting_id: Int!
+  user_id: String!
+  type: String!
+}
+
 input newReply {
   user_id: String!
   comment_id: Int!
@@ -191,9 +198,8 @@ type Query{
   getPlaylistByPlaylistVideo(playlistid: Int!, videoid: Int!): [DetailPlaylist!]!
 
   getPosting(userid: String!): [Posting!]!
-
+  getPostingLike(postingid: Int!, type: String!): [LikePosting!]!
 }
-
 
 type Mutation {
   createUser (input: newUser): User!
@@ -227,5 +233,6 @@ type Mutation {
   deleteDetailPlaylistVideo(playlistid: Int!, videoid: Int!): Boolean!
 
   createPosting(user_id: String!, description: String!, picture: String!): Posting!
+  postingLike(id: Int!, userid: String!, type: String!): Boolean!
 }
 

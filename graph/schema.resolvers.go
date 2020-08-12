@@ -578,6 +578,55 @@ func (r *mutationResolver) CreatePosting(ctx context.Context, userID string, des
 	return &posting, nil
 }
 
+func (r *mutationResolver) PostingLike(ctx context.Context, id int, userid string, typeArg string) (bool, error) {
+	var posting model.Posting
+
+	err := r.DB.Model(&posting).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("posting not found!")
+	}
+
+	var like model.LikePosting
+
+	err_like := r.DB.Model(&like).Where("posting_id = ? AND user_id = ?", id, userid).First()
+
+	if err_like != nil {
+
+		insert := model.LikePosting{
+			UserID:  userid,
+			PostingID: id,
+			Type:    typeArg,
+		}
+		_, err_insert := r.DB.Model(&insert).Insert()
+
+		if err_insert != nil {
+			return false, errors.New("insert posting like failed")
+		}
+
+		return true, nil
+	}
+
+	diff_like := r.DB.Model(&like).Where("posting_id = ? AND user_id = ? AND type = ?", id, userid, "like").First()
+
+	if diff_like == nil && typeArg == "like" {
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
+
+	} else if diff_like == nil && typeArg == "dislike" {
+		like.Type = "dislike"
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
+
+	} else if diff_like != nil && typeArg == "dislike" {
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
+
+	} else if diff_like != nil && typeArg == "like" {
+		like.Type = "like"
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
+	}
+
+	return true, nil
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var user []*model.User
 
@@ -822,13 +871,17 @@ func (r *queryResolver) GetPlaylistByPlaylistVideo(ctx context.Context, playlist
 func (r *queryResolver) GetPosting(ctx context.Context, userid string) ([]*model.Posting, error) {
 	var posting []*model.Posting
 
-	err := r.DB.Model(&posting).Where("user_id = ?",userid).Select()
+	err := r.DB.Model(&posting).Where("user_id = ?", userid).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query posting")
 	}
 
 	return posting, nil
+}
+
+func (r *queryResolver) GetPostingLike(ctx context.Context, postingid int, typeArg string) ([]*model.LikePosting, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Mutation returns generated.MutationResolver implementation.
