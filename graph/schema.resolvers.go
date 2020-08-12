@@ -562,12 +562,11 @@ func (r *mutationResolver) DeleteDetailPlaylistVideo(ctx context.Context, playli
 }
 
 func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost) (*model.Post, error) {
-
 	post := model.Post{
 		UserID:      input.UserID,
 		Description: input.Description,
 		Picture:     input.Picture,
-		Date:        input.Date,
+		Date:        time.Now().String(),
 	}
 
 	fmt.Println(post)
@@ -597,9 +596,9 @@ func (r *mutationResolver) PostLike(ctx context.Context, id int, userid string, 
 	if err_like != nil {
 
 		insert := model.LikePost{
-			UserID:  userid,
+			UserID: userid,
 			PostID: id,
-			Type:    typeArg,
+			Type:   typeArg,
 		}
 		_, err_insert := r.DB.Model(&insert).Insert()
 
@@ -874,7 +873,7 @@ func (r *queryResolver) GetPlaylistByPlaylistVideo(ctx context.Context, playlist
 func (r *queryResolver) Posts(ctx context.Context, userid string) ([]*model.Post, error) {
 	var post []*model.Post
 
-	err := r.DB.Model(&post).Where("user_id = ?",userid).Select()
+	err := r.DB.Model(&post).Where("user_id = ?", userid).Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query post")

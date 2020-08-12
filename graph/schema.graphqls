@@ -165,7 +165,6 @@ input newPost {
   user_id: String!
   description: String!
   picture: String!
-  date: String!
 }
 
 type LikePost {

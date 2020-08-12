@@ -1666,7 +1666,6 @@ input newPost {
   user_id: String!
   description: String!
   picture: String!
-  date: String!
 }
 
 type LikePost {
@@ -8648,12 +8647,6 @@ func (ec *executionContext) unmarshalInputnewPost(ctx context.Context, obj inter
 		case "picture":
 			var err error
 			it.Picture, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "date":
-			var err error
-			it.Date, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
