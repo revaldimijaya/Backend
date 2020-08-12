@@ -616,18 +616,18 @@ func (r *mutationResolver) PostingLike(ctx context.Context, id int, userid strin
 	diff_like := r.DB.Model(&like).Where("posting_id = ? AND user_id = ? AND type = ?", id, userid, "like").First()
 
 	if diff_like == nil && typeArg == "like" {
-		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
+		r.DB.Model(&like).Where("posting_id = ? AND user_id = ?", id, userid).Delete()
 
 	} else if diff_like == nil && typeArg == "dislike" {
 		like.Type = "dislike"
-		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
+		r.DB.Model(&like).Where("posting_id = ? AND user_id = ?", id, userid).Update()
 
 	} else if diff_like != nil && typeArg == "dislike" {
-		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
+		r.DB.Model(&like).Where("posting_id = ? AND user_id = ?", id, userid).Delete()
 
 	} else if diff_like != nil && typeArg == "like" {
 		like.Type = "like"
-		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
+		r.DB.Model(&like).Where("posting_id = ? AND user_id = ?", id, userid).Update()
 	}
 
 	return true, nil
