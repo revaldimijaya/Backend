@@ -562,7 +562,6 @@ func (r *mutationResolver) DeleteDetailPlaylistVideo(ctx context.Context, playli
 }
 
 func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost) (*model.Post, error) {
-	location, _ := time.LoadLocation("Asia/Jakarta")
 
 	post := model.Post{
 		UserID:      input.UserID,
