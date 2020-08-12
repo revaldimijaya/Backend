@@ -882,7 +882,11 @@ func (r *queryResolver) GetPosting(ctx context.Context, userid string) ([]*model
 }
 
 func (r *queryResolver) GetPostingLike(ctx context.Context, postingid int, typeArg string) ([]*model.LikePosting, error) {
-	panic(fmt.Errorf("not implemented"))
+	var like []*model.LikePosting
+
+	r.DB.Model(&like).Where("posting_id = ? AND type = ?", postingid, typeArg).Select()
+
+	return like, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
