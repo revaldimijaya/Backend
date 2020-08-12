@@ -568,7 +568,7 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost)
 		UserID:      input.UserID,
 		Description: input.Description,
 		Picture:     input.Picture,
-		Date:        time.Now().In(location).Format("2020-02-01 02:03:01"),
+		Date:        time.Now().Format("2020-02-01 02:03:01"),
 	}
 
 	_, err := r.DB.Model(&post).Insert()
