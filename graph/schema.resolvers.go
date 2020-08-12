@@ -16,12 +16,21 @@ import (
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	t := time.Now().In(location)
+	dateFormat := fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
+		t.Year(), t.Month(), t.Day(),
+		t.Hour(), t.Minute(), t.Second())
+
 	user := model.User{
-		ID:         input.ID,
-		Name:       input.Name,
-		Membership: input.Membership,
-		Photo:      input.Photo,
-		Subscriber: input.Subscriber,
+		ID:          input.ID,
+		Name:        input.Name,
+		Photo:       input.Photo,
+		Membership:  input.Membership,
+		Subscriber:  input.Subscriber,
+		CreatedAt:   dateFormat,
+		Views:       0,
+		Description: input.Description,
 	}
 
 	_, err := r.DB.Model(&user).Insert()
@@ -31,6 +40,10 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser)
 	}
 
 	return &user, nil
+}
+
+func (r *mutationResolver) ViewUser(ctx context.Context, userid string) (*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input *model.NewUser) (*model.User, error) {
@@ -600,9 +613,9 @@ func (r *mutationResolver) PostingLike(ctx context.Context, id int, userid strin
 	if err_like != nil {
 
 		insert := model.LikePosting{
-			UserID:  userid,
+			UserID:    userid,
 			PostingID: id,
-			Type:    typeArg,
+			Type:      typeArg,
 		}
 		_, err_insert := r.DB.Model(&insert).Insert()
 

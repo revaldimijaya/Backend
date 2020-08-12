@@ -4,6 +4,10 @@ type User {
   photo: String!
   membership: String!
   subscriber: Int!
+  created_at: String!
+  views: Int!
+  description: String!
+  header: String!
 }
 
 type Video {
@@ -141,6 +145,9 @@ input newUser {
   photo: String!
   membership: String!
   subscriber: Int!
+  views: Int!
+  description: String!
+  header: String!
 }
 
 input newVideo {
@@ -166,6 +173,14 @@ input newComment {
   comment: String!
   like: Int!
   dislike: Int!
+}
+
+type About {
+  user_id: String!
+  header: String!
+  description: String!
+  created_at: String!
+  views: Int!
 }
 
 type Query{
@@ -203,6 +218,7 @@ type Query{
 
 type Mutation {
   createUser (input: newUser): User!
+  viewUser(userid: String!): User!
   updateUser (id: String!, input: newUser): User!
   deleteUser (id: String!): Boolean!
   createVideo (input: newVideo): Video!

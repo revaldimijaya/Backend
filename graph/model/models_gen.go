@@ -2,6 +2,14 @@
 
 package model
 
+type About struct {
+	UserID      string `json:"user_id"`
+	Header      string `json:"header"`
+	Description string `json:"description"`
+	CreatedAt   string `json:"created_at"`
+	Views       int    `json:"views"`
+}
+
 type Comment struct {
 	ID      string `json:"id"`
 	UserID  string `json:"user_id"`
@@ -94,11 +102,15 @@ type Subscribe struct {
 }
 
 type User struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Photo      string `json:"photo"`
-	Membership string `json:"membership"`
-	Subscriber int    `json:"subscriber"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Photo       string `json:"photo"`
+	Membership  string `json:"membership"`
+	Subscriber  int    `json:"subscriber"`
+	CreatedAt   string `json:"created_at"`
+	Views       int    `json:"views"`
+	Description string `json:"description"`
+	Header      string `json:"header"`
 }
 
 type Video struct {
@@ -148,11 +160,14 @@ type NewReply struct {
 }
 
 type NewUser struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Photo      string `json:"photo"`
-	Membership string `json:"membership"`
-	Subscriber int    `json:"subscriber"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Photo       string `json:"photo"`
+	Membership  string `json:"membership"`
+	Subscriber  int    `json:"subscriber"`
+	Views       int    `json:"views"`
+	Description string `json:"description"`
+	Header      string `json:"header"`
 }
 
 type NewVideo struct {
