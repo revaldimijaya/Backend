@@ -9,9 +9,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-pg/pg/v9"
 	"strings"
 	"time"
+
+	pg "github.com/go-pg/pg/v9"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser) (*model.User, error) {
@@ -560,6 +561,74 @@ func (r *mutationResolver) DeleteDetailPlaylistVideo(ctx context.Context, playli
 	return true, nil
 }
 
+func (r *mutationResolver) CreatePost(ctx context.Context, input *model.NewPost) (*model.Post, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+
+	post := model.Post{
+		UserID:      input.UserID,
+		Description: input.Description,
+		Picture:     input.Picture,
+		Date:        time.Now().In(location).Format("2020-02-01 02:03:01"),
+	}
+
+	_, err := r.DB.Model(&post).Insert()
+
+	if err != nil {
+		return nil, errors.New("Insert new post failed")
+	}
+
+	return &post, nil
+}
+
+func (r *mutationResolver) PostLike(ctx context.Context, id int, userid string, typeArg string) (bool, error) {
+	var post model.Post
+
+	err := r.DB.Model(&post).Where("id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("post not found!")
+	}
+
+	var like model.LikePost
+
+	err_like := r.DB.Model(&like).Where("post_id = ? AND user_id = ?", id, userid).First()
+
+	if err_like != nil {
+
+		insert := model.LikePost{
+			UserID:  userid,
+			PostID: id,
+			Type:    typeArg,
+		}
+		_, err_insert := r.DB.Model(&insert).Insert()
+
+		if err_insert != nil {
+			return false, errors.New("insert video like failed")
+		}
+
+		return true, nil
+	}
+
+	diff_like := r.DB.Model(&like).Where("post_id = ? AND user_id = ? AND type = ?", id, userid, "like").First()
+
+	if diff_like == nil && typeArg == "like" {
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
+
+	} else if diff_like == nil && typeArg == "dislike" {
+		like.Type = "dislike"
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
+
+	} else if diff_like != nil && typeArg == "dislike" {
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Delete()
+
+	} else if diff_like != nil && typeArg == "like" {
+		like.Type = "like"
+		r.DB.Model(&like).Where("video_id = ? AND user_id = ?", id, userid).Update()
+	}
+
+	return true, nil
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var user []*model.User
 
@@ -703,7 +772,7 @@ func (r *queryResolver) GetSubscribe(ctx context.Context) ([]*model.Subscribe, e
 
 func (r *queryResolver) GetSubscribeVideo(ctx context.Context, userid string) ([]*model.Video, error) {
 	var video []*model.Video
-	s:=strings.Split(userid, ",")
+	s := strings.Split(userid, ",")
 	err := r.DB.Model(&video).Where("user_id IN (?)", pg.Strings(s)).Select()
 
 	if err != nil {
@@ -799,6 +868,26 @@ func (r *queryResolver) GetPlaylistByPlaylistVideo(ctx context.Context, playlist
 	}
 
 	return playlist, nil
+}
+
+func (r *queryResolver) Posts(ctx context.Context, userid string) ([]*model.Post, error) {
+	var post []*model.Post
+
+	err := r.DB.Model(&post).Where("user_id = ?",userid).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query post")
+	}
+
+	return post, nil
+}
+
+func (r *queryResolver) GetPostLike(ctx context.Context, postid int, typeArg string) ([]*model.LikePost, error) {
+	var like []*model.LikePost
+
+	r.DB.Model(&like).Where("video_id = ? AND type = ?", postid, typeArg).Select()
+
+	return like, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

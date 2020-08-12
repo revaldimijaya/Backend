@@ -153,6 +153,28 @@ input newComment {
   dislike: Int!
 }
 
+type Post {
+  id: ID!
+  user_id: String!
+  description: String!
+  picture: String!
+  date: String!
+}
+
+input newPost {
+  user_id: String!
+  description: String!
+  picture: String!
+  date: String!
+}
+
+type LikePost {
+  id: ID!
+  user_id: String!
+  post_id: Int!
+  type: String!
+}
+
 type Query{
   users: [User!]!
   videos: [Video!]!
@@ -181,6 +203,10 @@ type Query{
   getPlaylistUser(userid: String!): [Playlist!]!
   getPlaylistVideo(playlistid: Int!): [DetailPlaylist!]!
   getPlaylistByPlaylistVideo(playlistid: Int!, videoid: Int!): [DetailPlaylist!]!
+
+  posts(userid: String!): [Post!]!
+  getPostLike(postid: Int!, type: String!): [LikePost!]!
+
 }
 
 
@@ -214,5 +240,9 @@ type Mutation {
   createDetailPlaylist(playlistid: Int!, videoid: Int!): DetailPlaylist!
   deleteDetailPlaylist(id: Int!): Boolean!
   deleteDetailPlaylistVideo(playlistid: Int!, videoid: Int!): Boolean!
+
+  createPost(input: newPost): Post!
+  postLike(id: Int!, userid: String!, type: String!): Boolean!
+
 }
 

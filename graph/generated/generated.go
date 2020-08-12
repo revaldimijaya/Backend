@@ -71,6 +71,13 @@ type ComplexityRoot struct {
 		UserID    func(childComplexity int) int
 	}
 
+	LikePost struct {
+		ID     func(childComplexity int) int
+		PostID func(childComplexity int) int
+		Type   func(childComplexity int) int
+		UserID func(childComplexity int) int
+	}
+
 	LikeReply struct {
 		ID      func(childComplexity int) int
 		ReplyID func(childComplexity int) int
@@ -90,6 +97,7 @@ type ComplexityRoot struct {
 		CreateComment             func(childComplexity int, input *model.NewComment) int
 		CreateDetailPlaylist      func(childComplexity int, playlistid int, videoid int) int
 		CreatePlaylist            func(childComplexity int, input *model.NewPlaylist) int
+		CreatePost                func(childComplexity int, input *model.NewPost) int
 		CreateReply               func(childComplexity int, input *model.NewReply) int
 		CreateSubscribe           func(childComplexity int, userid string, subscribeto string) int
 		CreateUser                func(childComplexity int, input *model.NewUser) int
@@ -100,6 +108,7 @@ type ComplexityRoot struct {
 		DeletePlaylist            func(childComplexity int, id int) int
 		DeleteUser                func(childComplexity int, id string) int
 		DeleteVideo               func(childComplexity int, id string) int
+		PostLike                  func(childComplexity int, id int, userid string, typeArg string) int
 		ReplyLike                 func(childComplexity int, id int, userid string, typeArg string) int
 		UpdatePlaylist            func(childComplexity int, id int, title string, privacy string, description string) int
 		UpdateUser                func(childComplexity int, id string, input *model.NewUser) int
@@ -124,6 +133,14 @@ type ComplexityRoot struct {
 		Year        func(childComplexity int) int
 	}
 
+	Post struct {
+		Date        func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Picture     func(childComplexity int) int
+		UserID      func(childComplexity int) int
+	}
+
 	Query struct {
 		CheckSubscribe             func(childComplexity int, userid string, subscribeto string) int
 		Comment                    func(childComplexity int, videoid int) int
@@ -134,6 +151,7 @@ type ComplexityRoot struct {
 		GetPlaylistID              func(childComplexity int, playlistid int) int
 		GetPlaylistUser            func(childComplexity int, userid string) int
 		GetPlaylistVideo           func(childComplexity int, playlistid int) int
+		GetPostLike                func(childComplexity int, postid int, typeArg string) int
 		GetReplyLike               func(childComplexity int, replyid int, typeArg string) int
 		GetSubscribe               func(childComplexity int) int
 		GetSubscribeByUser         func(childComplexity int, userid string) int
@@ -144,6 +162,7 @@ type ComplexityRoot struct {
 		GetVideoLike               func(childComplexity int, videoid int, typeArg string) int
 		GetVideoTrending           func(childComplexity int) int
 		Playlists                  func(childComplexity int) int
+		Posts                      func(childComplexity int, userid string) int
 		Reply                      func(childComplexity int, commentid int) int
 		Users                      func(childComplexity int) int
 		Videos                     func(childComplexity int) int
@@ -223,6 +242,8 @@ type MutationResolver interface {
 	CreateDetailPlaylist(ctx context.Context, playlistid int, videoid int) (*model.DetailPlaylist, error)
 	DeleteDetailPlaylist(ctx context.Context, id int) (bool, error)
 	DeleteDetailPlaylistVideo(ctx context.Context, playlistid int, videoid int) (bool, error)
+	CreatePost(ctx context.Context, input *model.NewPost) (*model.Post, error)
+	PostLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
@@ -247,6 +268,8 @@ type QueryResolver interface {
 	GetPlaylistUser(ctx context.Context, userid string) ([]*model.Playlist, error)
 	GetPlaylistVideo(ctx context.Context, playlistid int) ([]*model.DetailPlaylist, error)
 	GetPlaylistByPlaylistVideo(ctx context.Context, playlistid int, videoid int) ([]*model.DetailPlaylist, error)
+	Posts(ctx context.Context, userid string) ([]*model.Post, error)
+	GetPostLike(ctx context.Context, postid int, typeArg string) ([]*model.LikePost, error)
 }
 
 type executableSchema struct {
@@ -397,6 +420,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LikeComment.UserID(childComplexity), true
 
+	case "LikePost.id":
+		if e.complexity.LikePost.ID == nil {
+			break
+		}
+
+		return e.complexity.LikePost.ID(childComplexity), true
+
+	case "LikePost.post_id":
+		if e.complexity.LikePost.PostID == nil {
+			break
+		}
+
+		return e.complexity.LikePost.PostID(childComplexity), true
+
+	case "LikePost.type":
+		if e.complexity.LikePost.Type == nil {
+			break
+		}
+
+		return e.complexity.LikePost.Type(childComplexity), true
+
+	case "LikePost.user_id":
+		if e.complexity.LikePost.UserID == nil {
+			break
+		}
+
+		return e.complexity.LikePost.UserID(childComplexity), true
+
 	case "LikeReply.id":
 		if e.complexity.LikeReply.ID == nil {
 			break
@@ -500,6 +551,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreatePlaylist(childComplexity, args["input"].(*model.NewPlaylist)), true
+
+	case "Mutation.createPost":
+		if e.complexity.Mutation.CreatePost == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createPost_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreatePost(childComplexity, args["input"].(*model.NewPost)), true
 
 	case "Mutation.createReply":
 		if e.complexity.Mutation.CreateReply == nil {
@@ -620,6 +683,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteVideo(childComplexity, args["id"].(string)), true
+
+	case "Mutation.postLike":
+		if e.complexity.Mutation.PostLike == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_postLike_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.PostLike(childComplexity, args["id"].(int), args["userid"].(string), args["type"].(string)), true
 
 	case "Mutation.replyLike":
 		if e.complexity.Mutation.ReplyLike == nil {
@@ -789,6 +864,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Playlist.Year(childComplexity), true
 
+	case "Post.date":
+		if e.complexity.Post.Date == nil {
+			break
+		}
+
+		return e.complexity.Post.Date(childComplexity), true
+
+	case "Post.description":
+		if e.complexity.Post.Description == nil {
+			break
+		}
+
+		return e.complexity.Post.Description(childComplexity), true
+
+	case "Post.id":
+		if e.complexity.Post.ID == nil {
+			break
+		}
+
+		return e.complexity.Post.ID(childComplexity), true
+
+	case "Post.picture":
+		if e.complexity.Post.Picture == nil {
+			break
+		}
+
+		return e.complexity.Post.Picture(childComplexity), true
+
+	case "Post.user_id":
+		if e.complexity.Post.UserID == nil {
+			break
+		}
+
+		return e.complexity.Post.UserID(childComplexity), true
+
 	case "Query.checkSubscribe":
 		if e.complexity.Query.CheckSubscribe == nil {
 			break
@@ -897,6 +1007,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetPlaylistVideo(childComplexity, args["playlistid"].(int)), true
 
+	case "Query.getPostLike":
+		if e.complexity.Query.GetPostLike == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getPostLike_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetPostLike(childComplexity, args["postid"].(int), args["type"].(string)), true
+
 	case "Query.getReplyLike":
 		if e.complexity.Query.GetReplyLike == nil {
 			break
@@ -1001,6 +1123,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Playlists(childComplexity), true
+
+	case "Query.posts":
+		if e.complexity.Query.Posts == nil {
+			break
+		}
+
+		args, err := ec.field_Query_posts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Posts(childComplexity, args["userid"].(string)), true
 
 	case "Query.reply":
 		if e.complexity.Query.Reply == nil {
@@ -1520,6 +1654,28 @@ input newComment {
   dislike: Int!
 }
 
+type Post {
+  id: ID!
+  user_id: String!
+  description: String!
+  picture: String!
+  date: String!
+}
+
+input newPost {
+  user_id: String!
+  description: String!
+  picture: String!
+  date: String!
+}
+
+type LikePost {
+  id: ID!
+  user_id: String!
+  post_id: Int!
+  type: String!
+}
+
 type Query{
   users: [User!]!
   videos: [Video!]!
@@ -1548,6 +1704,10 @@ type Query{
   getPlaylistUser(userid: String!): [Playlist!]!
   getPlaylistVideo(playlistid: Int!): [DetailPlaylist!]!
   getPlaylistByPlaylistVideo(playlistid: Int!, videoid: Int!): [DetailPlaylist!]!
+
+  posts(userid: String!): [Post!]!
+  getPostLike(postid: Int!, type: String!): [LikePost!]!
+
 }
 
 
@@ -1581,6 +1741,10 @@ type Mutation {
   createDetailPlaylist(playlistid: Int!, videoid: Int!): DetailPlaylist!
   deleteDetailPlaylist(id: Int!): Boolean!
   deleteDetailPlaylistVideo(playlistid: Int!, videoid: Int!): Boolean!
+
+  createPost(input: newPost): Post!
+  postLike(id: Int!, userid: String!, type: String!): Boolean!
+
 }
 
 `, BuiltIn: false},
@@ -1663,6 +1827,20 @@ func (ec *executionContext) field_Mutation_createPlaylist_args(ctx context.Conte
 	var arg0 *model.NewPlaylist
 	if tmp, ok := rawArgs["input"]; ok {
 		arg0, err = ec.unmarshalOnewPlaylist2ᚖGo_BackendᚋgraphᚋmodelᚐNewPlaylist(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createPost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.NewPost
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOnewPost2ᚖGo_BackendᚋgraphᚋmodelᚐNewPost(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1824,6 +2002,36 @@ func (ec *executionContext) field_Mutation_deleteVideo_args(ctx context.Context,
 		}
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_postLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userid"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["type"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg2
 	return args, nil
 }
 
@@ -2161,6 +2369,28 @@ func (ec *executionContext) field_Query_getPlaylistVideo_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_getPostLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["postid"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["postid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["type"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_getReplyLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2272,6 +2502,20 @@ func (ec *executionContext) field_Query_getVideoLike_args(ctx context.Context, r
 		}
 	}
 	args["type"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_posts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userid"] = arg0
 	return args, nil
 }
 
@@ -2946,6 +3190,142 @@ func (ec *executionContext) _LikeComment_type(ctx context.Context, field graphql
 	}()
 	fc := &graphql.FieldContext{
 		Object:   "LikeComment",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LikePost_id(ctx context.Context, field graphql.CollectedField, obj *model.LikePost) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LikePost",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LikePost_user_id(ctx context.Context, field graphql.CollectedField, obj *model.LikePost) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LikePost",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LikePost_post_id(ctx context.Context, field graphql.CollectedField, obj *model.LikePost) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LikePost",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PostID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LikePost_type(ctx context.Context, field graphql.CollectedField, obj *model.LikePost) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LikePost",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -4104,6 +4484,88 @@ func (ec *executionContext) _Mutation_deleteDetailPlaylistVideo(ctx context.Cont
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createPost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createPost_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreatePost(rctx, args["input"].(*model.NewPost))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Post)
+	fc.Result = res
+	return ec.marshalNPost2ᚖGo_BackendᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_postLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_postLike_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().PostLike(rctx, args["id"].(int), args["userid"].(string), args["type"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Playlist_id(ctx context.Context, field graphql.CollectedField, obj *model.Playlist) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4510,6 +4972,176 @@ func (ec *executionContext) _Playlist_views(ctx context.Context, field graphql.C
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Post_id(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Post",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Post_user_id(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Post",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Post_description(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Post",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Post_picture(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Post",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Picture, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Post_date(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Post",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Date, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5377,6 +6009,88 @@ func (ec *executionContext) _Query_getPlaylistByPlaylistVideo(ctx context.Contex
 	res := resTmp.([]*model.DetailPlaylist)
 	fc.Result = res
 	return ec.marshalNDetailPlaylist2ᚕᚖGo_BackendᚋgraphᚋmodelᚐDetailPlaylistᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_posts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_posts_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Posts(rctx, args["userid"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Post)
+	fc.Result = res
+	return ec.marshalNPost2ᚕᚖGo_BackendᚋgraphᚋmodelᚐPostᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getPostLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getPostLike_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetPostLike(rctx, args["postid"].(int), args["type"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.LikePost)
+	fc.Result = res
+	return ec.marshalNLikePost2ᚕᚖGo_BackendᚋgraphᚋmodelᚐLikePostᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -7913,6 +8627,42 @@ func (ec *executionContext) unmarshalInputnewPlaylist(ctx context.Context, obj i
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputnewPost(ctx context.Context, obj interface{}) (model.NewPost, error) {
+	var it model.NewPost
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "user_id":
+			var err error
+			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "picture":
+			var err error
+			it.Picture, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "date":
+			var err error
+			it.Date, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputnewReply(ctx context.Context, obj interface{}) (model.NewReply, error) {
 	var it model.NewReply
 	var asMap = obj.(map[string]interface{})
@@ -8250,6 +9000,48 @@ func (ec *executionContext) _LikeComment(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var likePostImplementors = []string{"LikePost"}
+
+func (ec *executionContext) _LikePost(ctx context.Context, sel ast.SelectionSet, obj *model.LikePost) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, likePostImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LikePost")
+		case "id":
+			out.Values[i] = ec._LikePost_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._LikePost_user_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "post_id":
+			out.Values[i] = ec._LikePost_post_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "type":
+			out.Values[i] = ec._LikePost_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var likeReplyImplementors = []string{"LikeReply"}
 
 func (ec *executionContext) _LikeReply(ctx context.Context, sel ast.SelectionSet, obj *model.LikeReply) graphql.Marshaler {
@@ -8454,6 +9246,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createPost":
+			out.Values[i] = ec._Mutation_createPost(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "postLike":
+			out.Values[i] = ec._Mutation_postLike(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8533,6 +9335,53 @@ func (ec *executionContext) _Playlist(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "views":
 			out.Values[i] = ec._Playlist_views(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var postImplementors = []string{"Post"}
+
+func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj *model.Post) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, postImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Post")
+		case "id":
+			out.Values[i] = ec._Post_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._Post_user_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "description":
+			out.Values[i] = ec._Post_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "picture":
+			out.Values[i] = ec._Post_picture(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "date":
+			out.Values[i] = ec._Post_date(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -8865,6 +9714,34 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getPlaylistByPlaylistVideo(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "posts":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_posts(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getPostLike":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getPostLike(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -9608,6 +10485,57 @@ func (ec *executionContext) marshalNLikeComment2ᚖGo_Backendᚋgraphᚋmodelᚐ
 	return ec._LikeComment(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNLikePost2Go_BackendᚋgraphᚋmodelᚐLikePost(ctx context.Context, sel ast.SelectionSet, v model.LikePost) graphql.Marshaler {
+	return ec._LikePost(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLikePost2ᚕᚖGo_BackendᚋgraphᚋmodelᚐLikePostᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.LikePost) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLikePost2ᚖGo_BackendᚋgraphᚋmodelᚐLikePost(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNLikePost2ᚖGo_BackendᚋgraphᚋmodelᚐLikePost(ctx context.Context, sel ast.SelectionSet, v *model.LikePost) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._LikePost(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNLikeReply2Go_BackendᚋgraphᚋmodelᚐLikeReply(ctx context.Context, sel ast.SelectionSet, v model.LikeReply) graphql.Marshaler {
 	return ec._LikeReply(ctx, sel, &v)
 }
@@ -9759,6 +10687,57 @@ func (ec *executionContext) marshalNPlaylist2ᚖGo_BackendᚋgraphᚋmodelᚐPla
 		return graphql.Null
 	}
 	return ec._Playlist(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPost2Go_BackendᚋgraphᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v model.Post) graphql.Marshaler {
+	return ec._Post(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPost2ᚕᚖGo_BackendᚋgraphᚋmodelᚐPostᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Post) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPost2ᚖGo_BackendᚋgraphᚋmodelᚐPost(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNPost2ᚖGo_BackendᚋgraphᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Post(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNReply2Go_BackendᚋgraphᚋmodelᚐReply(ctx context.Context, sel ast.SelectionSet, v model.Reply) graphql.Marshaler {
@@ -10454,6 +11433,18 @@ func (ec *executionContext) unmarshalOnewPlaylist2ᚖGo_Backendᚋgraphᚋmodel�
 		return nil, nil
 	}
 	res, err := ec.unmarshalOnewPlaylist2Go_BackendᚋgraphᚋmodelᚐNewPlaylist(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalOnewPost2Go_BackendᚋgraphᚋmodelᚐNewPost(ctx context.Context, v interface{}) (model.NewPost, error) {
+	return ec.unmarshalInputnewPost(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOnewPost2ᚖGo_BackendᚋgraphᚋmodelᚐNewPost(ctx context.Context, v interface{}) (*model.NewPost, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOnewPost2Go_BackendᚋgraphᚋmodelᚐNewPost(ctx, v)
 	return &res, err
 }
 

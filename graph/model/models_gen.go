@@ -30,6 +30,13 @@ type LikeComment struct {
 	Type      string `json:"type"`
 }
 
+type LikePost struct {
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
+	PostID int    `json:"post_id"`
+	Type   string `json:"type"`
+}
+
 type LikeReply struct {
 	ID      string `json:"id"`
 	UserID  string `json:"user_id"`
@@ -57,6 +64,14 @@ type Playlist struct {
 	Privacy     string `json:"privacy"`
 	UserID      string `json:"user_id"`
 	Views       int    `json:"views"`
+}
+
+type Post struct {
+	ID          string `json:"id"`
+	UserID      string `json:"user_id"`
+	Description string `json:"description"`
+	Picture     string `json:"picture"`
+	Date        string `json:"date"`
 }
 
 type Reply struct {
@@ -124,6 +139,13 @@ type NewPlaylist struct {
 	Privacy     string `json:"privacy"`
 	UserID      string `json:"user_id"`
 	Views       int    `json:"views"`
+}
+
+type NewPost struct {
+	UserID      string `json:"user_id"`
+	Description string `json:"description"`
+	Picture     string `json:"picture"`
+	Date        string `json:"date"`
 }
 
 type NewReply struct {
