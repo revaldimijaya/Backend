@@ -670,7 +670,7 @@ func (r *mutationResolver) CreateMembership(ctx context.Context, userid string, 
 		t.Hour(), t.Minute(), t.Second())
 
 	var dateEnd = ""
-	if typeArg == "month"{
+	if typeArg == "month" {
 		dateEnd = fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
 			t.Year(), t.Month()+1, t.Day(),
 			t.Hour(), t.Minute(), t.Second())
@@ -960,9 +960,46 @@ func (r *queryResolver) GetPostingLike(ctx context.Context, postingid int, typeA
 func (r *queryResolver) GetMembership(ctx context.Context, userid string) ([]*model.Membership, error) {
 	var like []*model.Membership
 
-	r.DB.Model(&like).Where("user_id = ?",userid).Select()
+	r.DB.Model(&like).Where("user_id = ?", userid).Select()
 
 	return like, nil
+}
+
+func (r *queryResolver) SearchVideo(ctx context.Context, name string) ([]*model.Video, error) {
+	var video []*model.Video
+
+	err := r.DB.Model(&video).Order("id").Where("visibility LIKE ? AND name LIKE ?", "public", name).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query video")
+	}
+
+	return video, nil
+}
+
+func (r *queryResolver) SearchPlaylist(ctx context.Context, name string) ([]*model.Playlist, error) {
+	var playlist []*model.Playlist
+
+	err := r.DB.Model(&playlist).Order("id").Where("privacy LIKE ? AND name LIKE ?", "public", name).Select()
+
+	if err != nil {
+		return nil, errors.New("Failed to query users")
+	}
+
+	return playlist, nil
+}
+
+func (r *queryResolver) SearchChannel(ctx context.Context, name string) ([]*model.User, error) {
+	var user []*model.User
+
+	err := r.DB.Model(&user).Where("name LIKE ?",name).Order("id").Select()
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, errors.New("Failed to query users")
+	}
+
+	return user, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

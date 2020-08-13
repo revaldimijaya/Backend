@@ -224,6 +224,10 @@ type Query{
   getPostingLike(postingid: Int!, type: String!): [LikePosting!]!
 
   getMembership(userid: String!): [Membership!]!
+
+  searchVideo(name: String!) :[Video!]!
+  searchPlaylist(name: String!) :[Playlist!]!
+  searchChannel(name: String!) :[User!]!
 }
 
 type Mutation {
