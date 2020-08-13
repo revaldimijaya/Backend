@@ -31,7 +31,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUser)
 		CreatedAt:   dateFormat,
 		Views:       0,
 		Description: input.Description,
-		Header: input.Header,
+		Header:      input.Header,
 	}
 
 	_, err := r.DB.Model(&user).Insert()
@@ -662,6 +662,40 @@ func (r *mutationResolver) PostingLike(ctx context.Context, id int, userid strin
 	return true, nil
 }
 
+func (r *mutationResolver) CreateMembership(ctx context.Context, userid string, typeArg string) (*model.Membership, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	t := time.Now().In(location)
+	dateFormat := fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
+		t.Year(), t.Month(), t.Day(),
+		t.Hour(), t.Minute(), t.Second())
+
+	var dateEnd = ""
+	if typeArg == "month"{
+		dateEnd = fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
+			t.Year(), t.Month()+1, t.Day(),
+			t.Hour(), t.Minute(), t.Second())
+	} else {
+		dateEnd = fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
+			t.Year()+1, t.Month(), t.Day(),
+			t.Hour(), t.Minute(), t.Second())
+	}
+
+	membership := model.Membership{
+		UserID:    userid,
+		CreatedAt: dateFormat,
+		EndAt:     dateEnd,
+		Type:      typeArg,
+	}
+
+	_, err := r.DB.Model(&membership).Insert()
+
+	if err != nil {
+		return nil, errors.New("Insert new membership failed")
+	}
+
+	return &membership, nil
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var user []*model.User
 
@@ -678,7 +712,7 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 func (r *queryResolver) Videos(ctx context.Context) ([]*model.Video, error) {
 	var video []*model.Video
 
-	err := r.DB.Model(&video).Order("id").Where("visibility LIKE ?","public").Select()
+	err := r.DB.Model(&video).Order("id").Where("visibility LIKE ?", "public").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query users")
@@ -919,6 +953,14 @@ func (r *queryResolver) GetPostingLike(ctx context.Context, postingid int, typeA
 	var like []*model.LikePosting
 
 	r.DB.Model(&like).Where("posting_id = ? AND type = ?", postingid, typeArg).Select()
+
+	return like, nil
+}
+
+func (r *queryResolver) GetMembership(ctx context.Context, userid string) ([]*model.Membership, error) {
+	var like []*model.Membership
+
+	r.DB.Model(&like).Where("user_id = ?",userid).Select()
 
 	return like, nil
 }

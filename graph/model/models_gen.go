@@ -59,6 +59,14 @@ type LikeVideo struct {
 	Type    string `json:"type"`
 }
 
+type Membership struct {
+	ID        string `json:"id"`
+	UserID    string `json:"user_id"`
+	CreatedAt string `json:"created_at"`
+	EndAt     string `json:"end_at"`
+	Type      string `json:"type"`
+}
+
 type Playlist struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`

@@ -183,6 +183,14 @@ type About {
   views: Int!
 }
 
+type Membership {
+  id: ID!
+  user_id: String!
+  created_at: String!
+  end_at: String!
+  type: String!
+}
+
 type Query{
   users: [User!]!
   videos: [Video!]!
@@ -214,6 +222,8 @@ type Query{
 
   getPosting(userid: String!): [Posting!]!
   getPostingLike(postingid: Int!, type: String!): [LikePosting!]!
+
+  getMembership(userid: String!): [Membership!]!
 }
 
 type Mutation {
@@ -250,5 +260,8 @@ type Mutation {
 
   createPosting(user_id: String!, description: String!, picture: String!): Posting!
   postingLike(id: Int!, userid: String!, type: String!): Boolean!
+
+  createMembership(userid: String!, type: String!): Membership!
+
 }
 
