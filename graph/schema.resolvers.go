@@ -868,7 +868,7 @@ func (r *queryResolver) CheckSubscribe(ctx context.Context, userid string, subsc
 func (r *queryResolver) GetCategory(ctx context.Context, category string) ([]*model.Video, error) {
 	var video []*model.Video
 
-	err := r.DB.Model(&video).Where("category LIKE ?", category).Order("watch DESC").Limit(20).Select()
+	err := r.DB.Model(&video).Where("category LIKE ?", category).Order("watch DESC").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query users")
