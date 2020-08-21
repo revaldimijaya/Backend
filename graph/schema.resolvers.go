@@ -590,6 +590,24 @@ func (r *mutationResolver) DeleteDetailPlaylistVideo(ctx context.Context, playli
 	return true, nil
 }
 
+func (r *mutationResolver) DeleteAllDetail(ctx context.Context, id int) (bool, error) {
+	var detail model.DetailPlaylist
+
+	err := r.DB.Model(&detail).Where("playlist_id = ?", id).First()
+
+	if err != nil {
+		return false, errors.New("detail not found!")
+	}
+
+	_, deleteErr := r.DB.Model(&detail).Where("playlist_id = ?", id).Delete()
+
+	if deleteErr != nil {
+		return false, errors.New("Delete detail failed")
+	}
+
+	return true, nil
+}
+
 func (r *mutationResolver) CreatePosting(ctx context.Context, userID string, description string, picture string) (*model.Posting, error) {
 	location, _ := time.LoadLocation("Asia/Jakarta")
 	t := time.Now().In(location)
@@ -992,7 +1010,7 @@ func (r *queryResolver) SearchPlaylist(ctx context.Context, name string) ([]*mod
 func (r *queryResolver) SearchChannel(ctx context.Context, name string) ([]*model.User, error) {
 	var user []*model.User
 
-	err := r.DB.Model(&user).Where("name LIKE ?",name).Order("id").Select()
+	err := r.DB.Model(&user).Where("name LIKE ?", name).Order("id").Select()
 
 	if err != nil {
 		fmt.Println(err)

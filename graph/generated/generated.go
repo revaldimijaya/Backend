@@ -119,6 +119,7 @@ type ComplexityRoot struct {
 		CreateSubscribe           func(childComplexity int, userid string, subscribeto string) int
 		CreateUser                func(childComplexity int, input *model.NewUser) int
 		CreateVideo               func(childComplexity int, input *model.NewVideo) int
+		DeleteAllDetail           func(childComplexity int, id int) int
 		DeleteComment             func(childComplexity int, userid string) int
 		DeleteDetailPlaylist      func(childComplexity int, id int) int
 		DeleteDetailPlaylistVideo func(childComplexity int, playlistid int, videoid int) int
@@ -269,6 +270,7 @@ type MutationResolver interface {
 	CreateDetailPlaylist(ctx context.Context, playlistid int, videoid int) (*model.DetailPlaylist, error)
 	DeleteDetailPlaylist(ctx context.Context, id int) (bool, error)
 	DeleteDetailPlaylistVideo(ctx context.Context, playlistid int, videoid int) (bool, error)
+	DeleteAllDetail(ctx context.Context, id int) (bool, error)
 	CreatePosting(ctx context.Context, userID string, description string, picture string) (*model.Posting, error)
 	PostingLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
 	CreateMembership(ctx context.Context, userid string, typeArg string) (*model.Membership, error)
@@ -725,6 +727,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateVideo(childComplexity, args["input"].(*model.NewVideo)), true
+
+	case "Mutation.deleteAllDetail":
+		if e.complexity.Mutation.DeleteAllDetail == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteAllDetail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteAllDetail(childComplexity, args["id"].(int)), true
 
 	case "Mutation.deleteComment":
 		if e.complexity.Mutation.DeleteComment == nil {
@@ -1964,6 +1978,7 @@ type Mutation {
   createDetailPlaylist(playlistid: Int!, videoid: Int!): DetailPlaylist!
   deleteDetailPlaylist(id: Int!): Boolean!
   deleteDetailPlaylistVideo(playlistid: Int!, videoid: Int!): Boolean!
+  deleteAllDetail(id: Int!): Boolean!
 
   createPosting(user_id: String!, description: String!, picture: String!): Posting!
   postingLike(id: Int!, userid: String!, type: String!): Boolean!
@@ -2173,6 +2188,20 @@ func (ec *executionContext) field_Mutation_createVideo_args(ctx context.Context,
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteAllDetail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -5182,6 +5211,47 @@ func (ec *executionContext) _Mutation_deleteDetailPlaylistVideo(ctx context.Cont
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().DeleteDetailPlaylistVideo(rctx, args["playlistid"].(int), args["videoid"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteAllDetail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteAllDetail_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteAllDetail(rctx, args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10379,6 +10449,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "deleteDetailPlaylistVideo":
 			out.Values[i] = ec._Mutation_deleteDetailPlaylistVideo(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteAllDetail":
+			out.Values[i] = ec._Mutation_deleteAllDetail(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
