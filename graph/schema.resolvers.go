@@ -714,6 +714,25 @@ func (r *mutationResolver) CreateMembership(ctx context.Context, userid string, 
 	return &membership, nil
 }
 
+func (r *mutationResolver) UpdateRestriction(ctx context.Context, userid string, bool string) (bool, error) {
+	var user model.User
+
+	err := r.DB.Model(&user).Where("id = ?", userid).First()
+
+	if err != nil {
+		return false, errors.New("user not found!")
+	}
+	user.Restriction = bool
+
+	_, updateErr := r.DB.Model(&user).Where("id = ?", userid).Update()
+
+	if updateErr != nil {
+		return false, errors.New("Update user failed")
+	}
+
+	return true, nil
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var user []*model.User
 

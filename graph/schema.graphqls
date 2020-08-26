@@ -8,6 +8,7 @@ type User {
   views: Int!
   description: String!
   header: String!
+  restriction: String!
 }
 
 type Video {
@@ -268,5 +269,6 @@ type Mutation {
 
   createMembership(userid: String!, type: String!): Membership!
 
+  updateRestriction(userid: String!, bool: String!): Boolean!
 }
 

@@ -129,6 +129,7 @@ type ComplexityRoot struct {
 		PostingLike               func(childComplexity int, id int, userid string, typeArg string) int
 		ReplyLike                 func(childComplexity int, id int, userid string, typeArg string) int
 		UpdatePlaylist            func(childComplexity int, id int, title string, privacy string, description string) int
+		UpdateRestriction         func(childComplexity int, userid string, bool string) int
 		UpdateUser                func(childComplexity int, id string, input *model.NewUser) int
 		UpdateVideo               func(childComplexity int, id string, input *model.NewVideo) int
 		VideoLike                 func(childComplexity int, id int, userid string, typeArg string) int
@@ -218,6 +219,7 @@ type ComplexityRoot struct {
 		Membership  func(childComplexity int) int
 		Name        func(childComplexity int) int
 		Photo       func(childComplexity int) int
+		Restriction func(childComplexity int) int
 		Subscriber  func(childComplexity int) int
 		Views       func(childComplexity int) int
 	}
@@ -274,6 +276,7 @@ type MutationResolver interface {
 	CreatePosting(ctx context.Context, userID string, description string, picture string) (*model.Posting, error)
 	PostingLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
 	CreateMembership(ctx context.Context, userid string, typeArg string) (*model.Membership, error)
+	UpdateRestriction(ctx context.Context, userid string, bool string) (bool, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
@@ -847,6 +850,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdatePlaylist(childComplexity, args["id"].(int), args["title"].(string), args["privacy"].(string), args["description"].(string)), true
+
+	case "Mutation.updateRestriction":
+		if e.complexity.Mutation.UpdateRestriction == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateRestriction_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateRestriction(childComplexity, args["userid"].(string), args["bool"].(string)), true
 
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -1490,6 +1505,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Photo(childComplexity), true
 
+	case "User.restriction":
+		if e.complexity.User.Restriction == nil {
+			break
+		}
+
+		return e.complexity.User.Restriction(childComplexity), true
+
 	case "User.subscriber":
 		if e.complexity.User.Subscriber == nil {
 			break
@@ -1725,6 +1747,7 @@ var sources = []*ast.Source{
   views: Int!
   description: String!
   header: String!
+  restriction: String!
 }
 
 type Video {
@@ -1985,6 +2008,7 @@ type Mutation {
 
   createMembership(userid: String!, type: String!): Membership!
 
+  updateRestriction(userid: String!, bool: String!): Boolean!
 }
 
 `, BuiltIn: false},
@@ -2392,6 +2416,28 @@ func (ec *executionContext) field_Mutation_updatePlaylist_args(ctx context.Conte
 		}
 	}
 	args["description"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateRestriction_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["bool"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["bool"] = arg1
 	return args, nil
 }
 
@@ -5391,6 +5437,47 @@ func (ec *executionContext) _Mutation_createMembership(ctx context.Context, fiel
 	return ec.marshalNMembership2ᚖGo_BackendᚋgraphᚋmodelᚐMembership(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_updateRestriction(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateRestriction_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateRestriction(rctx, args["userid"].(string), args["bool"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Playlist_id(ctx context.Context, field graphql.CollectedField, obj *model.Playlist) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -7883,6 +7970,40 @@ func (ec *executionContext) _User_header(ctx context.Context, field graphql.Coll
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Header, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_restriction(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Restriction, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10472,6 +10593,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "updateRestriction":
+			out.Values[i] = ec._Mutation_updateRestriction(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11196,6 +11322,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "header":
 			out.Values[i] = ec._User_header(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "restriction":
+			out.Values[i] = ec._User_restriction(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

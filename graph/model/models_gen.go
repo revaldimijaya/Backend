@@ -119,6 +119,7 @@ type User struct {
 	Views       int    `json:"views"`
 	Description string `json:"description"`
 	Header      string `json:"header"`
+	Restriction string `json:"restriction"`
 }
 
 type Video struct {
