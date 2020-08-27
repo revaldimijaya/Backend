@@ -77,7 +77,7 @@ type Notification struct {
 	ID          string `json:"id"`
 	UserID      string `json:"user_id"`
 	Type        string `json:"type"`
-	TypeID      string `json:"type_id"`
+	TypeID      int    `json:"type_id"`
 	Description string `json:"description"`
 	Thumbnail   string `json:"thumbnail"`
 	Photo       string `json:"photo"`
@@ -174,7 +174,7 @@ type NewComment struct {
 type NewNotification struct {
 	UserID      string `json:"user_id"`
 	Type        string `json:"type"`
-	TypeID      string `json:"type_id"`
+	TypeID      int    `json:"type_id"`
 	Description string `json:"description"`
 	Thumbnail   string `json:"thumbnail"`
 	Photo       string `json:"photo"`

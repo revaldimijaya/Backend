@@ -196,7 +196,7 @@ type Notification {
   id: ID!
   user_id: String!
   type: String!
-  type_id: String!
+  type_id: Int!
   description: String!
   thumbnail: String!
   photo: String!
@@ -206,7 +206,7 @@ type Notification {
 input  newNotification {
   user_id: String!
   type: String!
-  type_id: String!
+  type_id: Int!
   description: String!
   thumbnail: String!
   photo: String!

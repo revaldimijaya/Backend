@@ -2085,7 +2085,7 @@ type Notification {
   id: ID!
   user_id: String!
   type: String!
-  type_id: String!
+  type_id: Int!
   description: String!
   thumbnail: String!
   photo: String!
@@ -2095,7 +2095,7 @@ type Notification {
 input  newNotification {
   user_id: String!
   type: String!
-  type_id: String!
+  type_id: Int!
   description: String!
   thumbnail: String!
   photo: String!
@@ -6040,9 +6040,9 @@ func (ec *executionContext) _Notification_type_id(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Notification_description(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
@@ -10636,7 +10636,7 @@ func (ec *executionContext) unmarshalInputnewNotification(ctx context.Context, o
 			}
 		case "type_id":
 			var err error
-			it.TypeID, err = ec.unmarshalNString2string(ctx, v)
+			it.TypeID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}

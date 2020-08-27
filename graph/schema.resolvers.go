@@ -756,13 +756,13 @@ func (r *mutationResolver) CreateNotification(ctx context.Context, input *model.
 		t.Hour(), t.Minute(), t.Second())
 
 	notification := model.Notification{
-		UserID:    input.UserID,
-		Type:      input.Type,
-		TypeID:    input.TypeID,
+		UserID:      input.UserID,
+		Type:        input.Type,
+		TypeID:      input.TypeID,
 		Description: input.Description,
-		Thumbnail: input.Thumbnail,
-		Photo:     input.Photo,
-		CreatedAt: dateFormat,
+		Thumbnail:   input.Thumbnail,
+		Photo:       input.Photo,
+		CreatedAt:   dateFormat,
 	}
 
 	_, err := r.DB.Model(&notification).Insert()
