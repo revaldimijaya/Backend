@@ -113,7 +113,7 @@ type ComplexityRoot struct {
 		CreateComment             func(childComplexity int, input *model.NewComment) int
 		CreateDetailPlaylist      func(childComplexity int, playlistid int, videoid int) int
 		CreateMembership          func(childComplexity int, userid string, typeArg string) int
-		CreateNotif               func(childComplexity int, userid *string, notifto string) int
+		CreateNotif               func(childComplexity int, userid string, notifto string) int
 		CreateNotification        func(childComplexity int, input *model.NewNotification) int
 		CreatePlaylist            func(childComplexity int, input *model.NewPlaylist) int
 		CreatePosting             func(childComplexity int, userID string, description string, picture string) int
@@ -297,7 +297,7 @@ type MutationResolver interface {
 	PostingLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
 	CreateMembership(ctx context.Context, userid string, typeArg string) (*model.Membership, error)
 	UpdateRestriction(ctx context.Context, userid string, bool string) (bool, error)
-	CreateNotif(ctx context.Context, userid *string, notifto string) (*model.Notif, error)
+	CreateNotif(ctx context.Context, userid string, notifto string) (*model.Notif, error)
 	CreateNotification(ctx context.Context, input *model.NewNotification) (*model.Notification, error)
 }
 type QueryResolver interface {
@@ -693,7 +693,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateNotif(childComplexity, args["userid"].(*string), args["notifto"].(string)), true
+		return e.complexity.Mutation.CreateNotif(childComplexity, args["userid"].(string), args["notifto"].(string)), true
 
 	case "Mutation.createNotification":
 		if e.complexity.Mutation.CreateNotification == nil {
@@ -2180,7 +2180,7 @@ type Mutation {
 
   updateRestriction(userid: String!, bool: String!): Boolean!
 
-  createNotif(userid: String, notifto: String!): Notif!
+  createNotif(userid: String!, notifto: String!): Notif!
   createNotification(input: newNotification): Notification!
 }
 
@@ -2283,9 +2283,9 @@ func (ec *executionContext) field_Mutation_createMembership_args(ctx context.Con
 func (ec *executionContext) field_Mutation_createNotif_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["userid"]; ok {
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5739,7 +5739,7 @@ func (ec *executionContext) _Mutation_createNotif(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateNotif(rctx, args["userid"].(*string), args["notifto"].(string))
+		return ec.resolvers.Mutation().CreateNotif(rctx, args["userid"].(string), args["notifto"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
