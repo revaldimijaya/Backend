@@ -74,13 +74,14 @@ type Notif struct {
 }
 
 type Notification struct {
-	ID        string `json:"id"`
-	UserID    string `json:"user_id"`
-	Type      string `json:"type"`
-	TypeID    string `json:"type_id"`
-	Thumbnail string `json:"thumbnail"`
-	Photo     string `json:"photo"`
-	CreatedAt string `json:"created_at"`
+	ID          string `json:"id"`
+	UserID      string `json:"user_id"`
+	Type        string `json:"type"`
+	TypeID      string `json:"type_id"`
+	Description string `json:"description"`
+	Thumbnail   string `json:"thumbnail"`
+	Photo       string `json:"photo"`
+	CreatedAt   string `json:"created_at"`
 }
 
 type Playlist struct {
@@ -171,12 +172,13 @@ type NewComment struct {
 }
 
 type NewNotification struct {
-	UserID    string `json:"user_id"`
-	Type      string `json:"type"`
-	TypeID    string `json:"type_id"`
-	Thumbnail string `json:"thumbnail"`
-	Photo     string `json:"photo"`
-	CreatedAt string `json:"created_at"`
+	UserID      string `json:"user_id"`
+	Type        string `json:"type"`
+	TypeID      string `json:"type_id"`
+	Description string `json:"description"`
+	Thumbnail   string `json:"thumbnail"`
+	Photo       string `json:"photo"`
+	CreatedAt   string `json:"created_at"`
 }
 
 type NewPlaylist struct {

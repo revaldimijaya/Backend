@@ -147,13 +147,14 @@ type ComplexityRoot struct {
 	}
 
 	Notification struct {
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Photo     func(childComplexity int) int
-		Thumbnail func(childComplexity int) int
-		Type      func(childComplexity int) int
-		TypeID    func(childComplexity int) int
-		UserID    func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Photo       func(childComplexity int) int
+		Thumbnail   func(childComplexity int) int
+		Type        func(childComplexity int) int
+		TypeID      func(childComplexity int) int
+		UserID      func(childComplexity int) int
 	}
 
 	Playlist struct {
@@ -1010,6 +1011,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Notification.CreatedAt(childComplexity), true
+
+	case "Notification.description":
+		if e.complexity.Notification.Description == nil {
+			break
+		}
+
+		return e.complexity.Notification.Description(childComplexity), true
 
 	case "Notification.id":
 		if e.complexity.Notification.ID == nil {
@@ -2078,6 +2086,7 @@ type Notification {
   user_id: String!
   type: String!
   type_id: String!
+  description: String!
   thumbnail: String!
   photo: String!
   created_at: String!
@@ -2087,6 +2096,7 @@ input  newNotification {
   user_id: String!
   type: String!
   type_id: String!
+  description: String!
   thumbnail: String!
   photo: String!
   created_at: String!
@@ -6019,6 +6029,40 @@ func (ec *executionContext) _Notification_type_id(ctx context.Context, field gra
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TypeID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Notification_description(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Notification",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10596,6 +10640,12 @@ func (ec *executionContext) unmarshalInputnewNotification(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
+		case "description":
+			var err error
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "thumbnail":
 			var err error
 			it.Thumbnail, err = ec.unmarshalNString2string(ctx, v)
@@ -11473,6 +11523,11 @@ func (ec *executionContext) _Notification(ctx context.Context, sel ast.Selection
 			}
 		case "type_id":
 			out.Values[i] = ec._Notification_type_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "description":
+			out.Values[i] = ec._Notification_description(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

@@ -759,6 +759,7 @@ func (r *mutationResolver) CreateNotification(ctx context.Context, input *model.
 		UserID:    input.UserID,
 		Type:      input.Type,
 		TypeID:    input.TypeID,
+		Description: input.Description,
 		Thumbnail: input.Thumbnail,
 		Photo:     input.Photo,
 		CreatedAt: dateFormat,
@@ -1080,11 +1081,27 @@ func (r *queryResolver) SearchChannel(ctx context.Context, name string) ([]*mode
 }
 
 func (r *queryResolver) GetNotif(ctx context.Context, userid string) ([]*model.Notif, error) {
-	panic(fmt.Errorf("not implemented"))
+	var notif []*model.Notif
+
+	err := r.DB.Model(&notif).Where("user_id = ?", userid).Select()
+
+	if err != nil {
+		return nil, errors.New("notif not found!")
+	}
+
+	return notif, nil
 }
 
 func (r *queryResolver) GetNotification(ctx context.Context, userid string) ([]*model.Notification, error) {
-	panic(fmt.Errorf("not implemented"))
+	var notification []*model.Notification
+
+	err := r.DB.Model(&notification).Where("user_id = ?", userid).Select()
+
+	if err != nil {
+		return nil, errors.New("notification not found!")
+	}
+
+	return notification, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

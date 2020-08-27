@@ -197,6 +197,7 @@ type Notification {
   user_id: String!
   type: String!
   type_id: String!
+  description: String!
   thumbnail: String!
   photo: String!
   created_at: String!
@@ -206,6 +207,7 @@ input  newNotification {
   user_id: String!
   type: String!
   type_id: String!
+  description: String!
   thumbnail: String!
   photo: String!
   created_at: String!
