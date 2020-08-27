@@ -67,6 +67,22 @@ type Membership struct {
 	Type      string `json:"type"`
 }
 
+type Notif struct {
+	ID      string `json:"id"`
+	UserID  string `json:"user_id"`
+	NotifTo string `json:"notif_to"`
+}
+
+type Notification struct {
+	ID        string `json:"id"`
+	UserID    string `json:"user_id"`
+	Type      string `json:"type"`
+	TypeID    string `json:"type_id"`
+	Thumbnail string `json:"thumbnail"`
+	Photo     string `json:"photo"`
+	CreatedAt string `json:"created_at"`
+}
+
 type Playlist struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
@@ -152,6 +168,15 @@ type NewComment struct {
 	Comment string `json:"comment"`
 	Like    int    `json:"like"`
 	Dislike int    `json:"dislike"`
+}
+
+type NewNotification struct {
+	UserID    string `json:"user_id"`
+	Type      string `json:"type"`
+	TypeID    string `json:"type_id"`
+	Thumbnail string `json:"thumbnail"`
+	Photo     string `json:"photo"`
+	CreatedAt string `json:"created_at"`
 }
 
 type NewPlaylist struct {

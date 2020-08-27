@@ -733,6 +733,46 @@ func (r *mutationResolver) UpdateRestriction(ctx context.Context, userid string,
 	return true, nil
 }
 
+func (r *mutationResolver) CreateNotif(ctx context.Context, userid string, notifto string) (*model.Notif, error) {
+	notif := model.Notif{
+		UserID:  userid,
+		NotifTo: notifto,
+	}
+
+	_, err := r.DB.Model(&notif).Insert()
+
+	if err != nil {
+		return nil, errors.New("Insert new notif failed")
+	}
+
+	return &notif, nil
+}
+
+func (r *mutationResolver) CreateNotification(ctx context.Context, input *model.NewNotification) (*model.Notification, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	t := time.Now().In(location)
+	dateFormat := fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
+		t.Year(), t.Month(), t.Day(),
+		t.Hour(), t.Minute(), t.Second())
+
+	notification := model.Notification{
+		UserID:    input.UserID,
+		Type:      input.Type,
+		TypeID:    input.TypeID,
+		Thumbnail: input.Thumbnail,
+		Photo:     input.Photo,
+		CreatedAt: dateFormat,
+	}
+
+	_, err := r.DB.Model(&notification).Insert()
+
+	if err != nil {
+		return nil, errors.New("Insert new notification failed")
+	}
+
+	return &notification, nil
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	var user []*model.User
 
@@ -1037,6 +1077,14 @@ func (r *queryResolver) SearchChannel(ctx context.Context, name string) ([]*mode
 	}
 
 	return user, nil
+}
+
+func (r *queryResolver) GetNotif(ctx context.Context, userid string) ([]*model.Notif, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) GetNotification(ctx context.Context, userid string) ([]*model.Notification, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

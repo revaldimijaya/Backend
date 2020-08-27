@@ -192,6 +192,31 @@ type Membership {
   type: String!
 }
 
+type Notification {
+  id: ID!
+  user_id: String!
+  type: String!
+  type_id: String!
+  thumbnail: String!
+  photo: String!
+  created_at: String!
+}
+
+input  newNotification {
+  user_id: String!
+  type: String!
+  type_id: String!
+  thumbnail: String!
+  photo: String!
+  created_at: String!
+}
+
+type Notif {
+  id: ID!
+  user_id: String!
+  notif_to: String!
+}
+
 type Query{
   users: [User!]!
   videos: [Video!]!
@@ -229,6 +254,9 @@ type Query{
   searchVideo(name: String!) :[Video!]!
   searchPlaylist(name: String!) :[Playlist!]!
   searchChannel(name: String!) :[User!]!
+
+  getNotif(userid: String!) :[Notif!]!
+  getNotification(userid: String!) :[Notification!]!
 }
 
 type Mutation {
@@ -270,5 +298,8 @@ type Mutation {
   createMembership(userid: String!, type: String!): Membership!
 
   updateRestriction(userid: String!, bool: String!): Boolean!
+
+  createNotif(userid: String!, notifto: String!): Notif!
+  createNotification(input: newNotification): Notification!
 }
 
