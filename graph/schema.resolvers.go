@@ -1094,8 +1094,8 @@ func (r *queryResolver) GetNotif(ctx context.Context, userid string) ([]*model.N
 
 func (r *queryResolver) GetNotification(ctx context.Context, userid string) ([]*model.Notification, error) {
 	var notification []*model.Notification
-
-	err := r.DB.Model(&notification).Where("user_id = ?", userid).Select()
+	s := strings.Split(userid, ",")
+	err := r.DB.Model(&notification).Where("user_id IN (?)", pg.Strings(s)).Select()
 
 	if err != nil {
 		return nil, errors.New("notification not found!")
