@@ -303,5 +303,6 @@ type Mutation {
 
   createNotif(userid: String!, notifto: String!): Notif!
   createNotification(input: newNotification): Notification!
+  deleteNotif(userid: String!, notifto: String!): Notif!
 }
 

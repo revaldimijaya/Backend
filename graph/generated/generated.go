@@ -125,6 +125,7 @@ type ComplexityRoot struct {
 		DeleteComment             func(childComplexity int, userid string) int
 		DeleteDetailPlaylist      func(childComplexity int, id int) int
 		DeleteDetailPlaylistVideo func(childComplexity int, playlistid int, videoid int) int
+		DeleteNotif               func(childComplexity int, userid string, notifto string) int
 		DeletePlaylist            func(childComplexity int, id int) int
 		DeleteUser                func(childComplexity int, id string) int
 		DeleteVideo               func(childComplexity int, id string) int
@@ -300,6 +301,7 @@ type MutationResolver interface {
 	UpdateRestriction(ctx context.Context, userid string, bool string) (bool, error)
 	CreateNotif(ctx context.Context, userid string, notifto string) (*model.Notif, error)
 	CreateNotification(ctx context.Context, input *model.NewNotification) (*model.Notification, error)
+	DeleteNotif(ctx context.Context, userid string, notifto string) (*model.Notif, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
@@ -827,6 +829,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteDetailPlaylistVideo(childComplexity, args["playlistid"].(int), args["videoid"].(int)), true
+
+	case "Mutation.deleteNotif":
+		if e.complexity.Mutation.DeleteNotif == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteNotif_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteNotif(childComplexity, args["userid"].(string), args["notifto"].(string)), true
 
 	case "Mutation.deletePlaylist":
 		if e.complexity.Mutation.DeletePlaylist == nil {
@@ -2192,6 +2206,7 @@ type Mutation {
 
   createNotif(userid: String!, notifto: String!): Notif!
   createNotification(input: newNotification): Notification!
+  deleteNotif(userid: String!, notifto: String!): Notif!
 }
 
 `, BuiltIn: false},
@@ -2495,6 +2510,28 @@ func (ec *executionContext) field_Mutation_deleteDetailPlaylist_args(ctx context
 		}
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteNotif_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userid"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["notifto"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["notifto"] = arg1
 	return args, nil
 }
 
@@ -5805,6 +5842,47 @@ func (ec *executionContext) _Mutation_createNotification(ctx context.Context, fi
 	res := resTmp.(*model.Notification)
 	fc.Result = res
 	return ec.marshalNNotification2ᚖGo_BackendᚋgraphᚋmodelᚐNotification(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteNotif(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteNotif_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteNotif(rctx, args["userid"].(string), args["notifto"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Notif)
+	fc.Result = res
+	return ec.marshalNNotif2ᚖGo_BackendᚋgraphᚋmodelᚐNotif(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Notif_id(ctx context.Context, field graphql.CollectedField, obj *model.Notif) (ret graphql.Marshaler) {
@@ -11444,6 +11522,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "createNotification":
 			out.Values[i] = ec._Mutation_createNotification(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteNotif":
+			out.Values[i] = ec._Mutation_deleteNotif(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
