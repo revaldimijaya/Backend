@@ -777,7 +777,7 @@ func (r *mutationResolver) CreateNotification(ctx context.Context, input *model.
 func (r *mutationResolver) DeleteNotif(ctx context.Context, userid string, notifto string) (*model.Notif, error) {
 	var notif model.Notif
 
-	err, _ := r.DB.Model(&notif).Where("user_id = ? AND notif_to = ?", userid, notifto).Delete()
+	_, err := r.DB.Model(&notif).Where("user_id = ? AND notif_to = ?", userid, notifto).Delete()
 
 	if err != nil {
 		return nil, errors.New("notif not found!")
