@@ -143,7 +143,7 @@ func (r *mutationResolver) CreateVideo(ctx context.Context, input *model.NewVide
 	return &video, nil
 }
 
-func (r *mutationResolver) UpdateVideo(ctx context.Context, id string, input *model.NewVideo) (*model.Video, error) {
+func (r *mutationResolver) UpdateVideo(ctx context.Context, id int, input *model.NewVideo) (*model.Video, error) {
 	var video model.Video
 
 	err := r.DB.Model(&video).Where("id = ?", id).First()
@@ -329,7 +329,7 @@ func (r *mutationResolver) ReplyLike(ctx context.Context, id int, userid string,
 	return true, nil
 }
 
-func (r *mutationResolver) DeleteVideo(ctx context.Context, id string) (bool, error) {
+func (r *mutationResolver) DeleteVideo(ctx context.Context, id int) (bool, error) {
 	var video model.Video
 
 	err := r.DB.Model(&video).Where("id = ?", id).First()

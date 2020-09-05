@@ -267,7 +267,7 @@ type Mutation {
   updateUser (id: String!, input: newUser): User!
   deleteUser (id: String!): Boolean!
   createVideo (input: newVideo): Video!
-  updateVideo (id: ID!, input: newVideo): Video!
+  updateVideo (id: Int!, input: newVideo): Video!
   watch (id: Int!): Boolean!
 
   videoLike(id: Int!, userid: String!, type: String!): Boolean!
@@ -276,7 +276,7 @@ type Mutation {
 
   replyLike(id: Int!, userid: String!, type: String!): Boolean!
 
-  deleteVideo (id: ID!): Boolean!
+  deleteVideo (id: Int!): Boolean!
   createComment (input: newComment): Comment!
   deleteComment (userid: String!): Boolean!
 

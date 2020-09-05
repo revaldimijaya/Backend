@@ -128,13 +128,13 @@ type ComplexityRoot struct {
 		DeleteNotif               func(childComplexity int, userid string, notifto string) int
 		DeletePlaylist            func(childComplexity int, id int) int
 		DeleteUser                func(childComplexity int, id string) int
-		DeleteVideo               func(childComplexity int, id string) int
+		DeleteVideo               func(childComplexity int, id int) int
 		PostingLike               func(childComplexity int, id int, userid string, typeArg string) int
 		ReplyLike                 func(childComplexity int, id int, userid string, typeArg string) int
 		UpdatePlaylist            func(childComplexity int, id int, title string, privacy string, description string) int
 		UpdateRestriction         func(childComplexity int, userid string, bool string) int
 		UpdateUser                func(childComplexity int, id string, input *model.NewUser) int
-		UpdateVideo               func(childComplexity int, id string, input *model.NewVideo) int
+		UpdateVideo               func(childComplexity int, id int, input *model.NewVideo) int
 		VideoLike                 func(childComplexity int, id int, userid string, typeArg string) int
 		ViewPlaylist              func(childComplexity int, id int) int
 		ViewUser                  func(childComplexity int, userid string) int
@@ -277,12 +277,12 @@ type MutationResolver interface {
 	UpdateUser(ctx context.Context, id string, input *model.NewUser) (*model.User, error)
 	DeleteUser(ctx context.Context, id string) (bool, error)
 	CreateVideo(ctx context.Context, input *model.NewVideo) (*model.Video, error)
-	UpdateVideo(ctx context.Context, id string, input *model.NewVideo) (*model.Video, error)
+	UpdateVideo(ctx context.Context, id int, input *model.NewVideo) (*model.Video, error)
 	Watch(ctx context.Context, id int) (bool, error)
 	VideoLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
 	CommentLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
 	ReplyLike(ctx context.Context, id int, userid string, typeArg string) (bool, error)
-	DeleteVideo(ctx context.Context, id string) (bool, error)
+	DeleteVideo(ctx context.Context, id int) (bool, error)
 	CreateComment(ctx context.Context, input *model.NewComment) (*model.Comment, error)
 	DeleteComment(ctx context.Context, userid string) (bool, error)
 	CreateReply(ctx context.Context, input *model.NewReply) (*model.Reply, error)
@@ -876,7 +876,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteVideo(childComplexity, args["id"].(string)), true
+		return e.complexity.Mutation.DeleteVideo(childComplexity, args["id"].(int)), true
 
 	case "Mutation.postingLike":
 		if e.complexity.Mutation.PostingLike == nil {
@@ -948,7 +948,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateVideo(childComplexity, args["id"].(string), args["input"].(*model.NewVideo)), true
+		return e.complexity.Mutation.UpdateVideo(childComplexity, args["id"].(int), args["input"].(*model.NewVideo)), true
 
 	case "Mutation.videoLike":
 		if e.complexity.Mutation.VideoLike == nil {
@@ -2170,7 +2170,7 @@ type Mutation {
   updateUser (id: String!, input: newUser): User!
   deleteUser (id: String!): Boolean!
   createVideo (input: newVideo): Video!
-  updateVideo (id: ID!, input: newVideo): Video!
+  updateVideo (id: Int!, input: newVideo): Video!
   watch (id: Int!): Boolean!
 
   videoLike(id: Int!, userid: String!, type: String!): Boolean!
@@ -2179,7 +2179,7 @@ type Mutation {
 
   replyLike(id: Int!, userid: String!, type: String!): Boolean!
 
-  deleteVideo (id: ID!): Boolean!
+  deleteVideo (id: Int!): Boolean!
   createComment (input: newComment): Comment!
   deleteComment (userid: String!): Boolean!
 
@@ -2566,9 +2566,9 @@ func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deleteVideo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2722,9 +2722,9 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateVideo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -4884,7 +4884,7 @@ func (ec *executionContext) _Mutation_updateVideo(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateVideo(rctx, args["id"].(string), args["input"].(*model.NewVideo))
+		return ec.resolvers.Mutation().UpdateVideo(rctx, args["id"].(int), args["input"].(*model.NewVideo))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5089,7 +5089,7 @@ func (ec *executionContext) _Mutation_deleteVideo(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteVideo(rctx, args["id"].(string))
+		return ec.resolvers.Mutation().DeleteVideo(rctx, args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
