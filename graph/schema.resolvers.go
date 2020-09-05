@@ -152,13 +152,11 @@ func (r *mutationResolver) UpdateVideo(ctx context.Context, id string, input *mo
 		return nil, errors.New("video not found!")
 	}
 
-	video.UserID = input.UserID
 	video.URL = input.URL
-	video.Watch = input.Watch
-	video.Like = input.Like
-	video.Dislike = input.Dislike
-	video.Restriction = input.Restriction
-	video.Location = input.Location
+	video.Name = input.Name
+	video.Description = input.Description
+	video.Thumbnail = input.Thumbnail
+	video.Visibility = input.Visibility
 
 	_, updateErr := r.DB.Model(&video).Where("id = ?", id).Update()
 
