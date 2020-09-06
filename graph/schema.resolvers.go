@@ -1004,7 +1004,7 @@ func (r *queryResolver) GetPlaylistUser(ctx context.Context, userid string) ([]*
 func (r *queryResolver) GetPlaylistVideo(ctx context.Context, playlistid int) ([]*model.DetailPlaylist, error) {
 	var playlist []*model.DetailPlaylist
 
-	err := r.DB.Model(&playlist).Where("playlist_id = ?", playlistid).Select()
+	err := r.DB.Model(&playlist).Where("playlist_id = ?", playlistid).Order("privacy ASC").Select()
 
 	if err != nil {
 		return nil, errors.New("Failed to query playlist")
